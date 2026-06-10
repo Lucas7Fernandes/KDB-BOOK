@@ -1,10 +1,14 @@
 /**
  * Camada de cliente HTTP para os serviços externos.
  *
- * Estratégia CORS:
- *   1. Make.com tem CORS habilitado por padrão — chamamos diretamente
- *   2. Se a chamada direta falhar (raro), fazemos retry via allorigins.win
- *   3. corsproxy.io foi removido (certificado SSL inválido em 2026)
+ * Estratégia CORS (resolve "Failed to fetch" em webhooks Make.com):
+ *   - Usamos Content-Type: text/plain;charset=UTF-8 em vez de application/json
+ *   - Isso converte a chamada em "simple CORS request" — o browser NÃO faz
+ *     preflight OPTIONS, indo direto ao POST. Como o Make.com não responde
+ *     adequadamente ao OPTIONS preflight, isso evita o bloqueio CORS.
+ *   - O body continua sendo JSON valido (string), e Make.com parseia normalmente.
+ *
+ * Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests
  */
 
 import { CONFIG } from '../data/config.js';
@@ -13,56 +17,46 @@ const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
 const CANVA_MCP_URL = 'https://mcp.canva.com/mcp';
 
-const FALLBACK_PROXY = 'https://api.allorigins.win/raw?url=';
-
 /**
- * Faz um POST que tenta primeiro direto e, se falhar (CORS/rede),
- * tenta novamente via proxy.
+ * Gera uma imagem para um item específico.
+ * Usa Content-Type: text/plain para evitar CORS preflight.
  */
-async function postWithFallback(url, body, signal, forceProxy = false) {
-  const payload = JSON.stringify(body);
+export async function generateImage(item, options, signal) {
+  const { webhookUrl } = options;
+  const payload = JSON.stringify({
+    animal_en: item.en,
+    animal_pt: item.pt,
+  });
 
-  // Tentativa 1: direto (Make.com tem CORS habilitado nativamente)
-  if (!forceProxy) {
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload,
-        signal,
-      });
-      if (response.ok) return response.json();
-      if (response.status < 500) return response.json();
-    } catch (err) {
-      if (err.name === 'AbortError') throw err;
-      console.warn('[api] Direct call failed, trying proxy:', err.message);
-    }
-  }
-
-  // Tentativa 2: via allorigins (SSL válido)
-  const proxyUrl = `${FALLBACK_PROXY}${encodeURIComponent(url)}`;
-  const response = await fetch(proxyUrl, {
+  const response = await fetch(webhookUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      // text/plain é "simple header" -> sem preflight OPTIONS
+      'Content-Type': 'text/plain;charset=UTF-8',
+    },
     body: payload,
     signal,
+    mode: 'cors',
   });
+
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status} via proxy`);
+    const text = await response.text().catch(() => '');
+    throw new Error(`HTTP ${response.status}: ${text.slice(0, 200) || response.statusText}`);
   }
-  return response.json();
+
+  // Make.com às vezes retorna text/plain mesmo quando o body é JSON
+  const raw = await response.text();
+  try {
+    return JSON.parse(raw);
+  } catch {
+    // Se não for JSON (Make ainda não configurado), retorna estrutura mínima
+    throw new Error(`Resposta nao-JSON do webhook: ${raw.slice(0, 200)}`);
+  }
 }
 
-export async function generateImage(item, options, signal) {
-  const { webhookUrl, useProxy } = options;
-  return postWithFallback(
-    webhookUrl,
-    { animal_en: item.en, animal_pt: item.pt },
-    signal,
-    useProxy
-  );
-}
-
+/**
+ * Cria uma chamada à Claude API com timeout via AbortController.
+ */
 async function callClaudeAPI(body, timeoutMs = 60_000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
