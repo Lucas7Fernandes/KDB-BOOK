@@ -8,7 +8,7 @@ export const CONFIG = {
   WEBHOOK_URL: import.meta.env.VITE_WEBHOOK_URL ||
     'https://hook.us2.make.com/expoqepqmwwgbyq86tej96imedg8g9m7',
 
-  USE_CORS_PROXY: import.meta.env.VITE_USE_CORS_PROXY !== 'false',
+  USE_CORS_PROXY: import.meta.env.VITE_USE_CORS_PROXY === 'true',
 
   COST_PER_IMAGE: parseFloat(import.meta.env.VITE_COST_PER_IMAGE) || 0.03,
 

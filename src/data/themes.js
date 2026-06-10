@@ -16,7 +16,7 @@ export const THEMES = {
   selva: {
     name: 'Animais da Selva',
     emoji: '🌿',
-    color: '#4ADE80',
+    color: '#15803D',
     cat: 'animais',
     items: [
       item('lion', 'Leão'),
@@ -45,7 +45,7 @@ export const THEMES = {
   fazenda: {
     name: 'Animais da Fazenda',
     emoji: '🐄',
-    color: '#FCD34D',
+    color: '#B45309',
     cat: 'animais',
     items: [
       item('cow', 'Vaca'),
@@ -74,7 +74,7 @@ export const THEMES = {
   oceano: {
     name: 'Animais do Oceano',
     emoji: '🌊',
-    color: '#60A5FA',
+    color: '#1D4ED8',
     cat: 'animais',
     items: [
       item('dolphin', 'Golfinho'),
@@ -103,7 +103,7 @@ export const THEMES = {
   floresta: {
     name: 'Animais da Floresta',
     emoji: '🌲',
-    color: '#86EFAC',
+    color: '#16A34A',
     cat: 'animais',
     items: [
       item('deer', 'Veado'),
@@ -132,7 +132,7 @@ export const THEMES = {
   artico: {
     name: 'Animais do Ártico',
     emoji: '❄️',
-    color: '#7DD3FC',
+    color: '#0369A1',
     cat: 'animais',
     items: [
       item('polar bear', 'Urso-Polar'),
@@ -161,7 +161,7 @@ export const THEMES = {
   domesticos: {
     name: 'Animais Domésticos',
     emoji: '🐕',
-    color: '#F9A8D4',
+    color: '#BE185D',
     cat: 'animais',
     items: [
       item('dog', 'Cachorro'),
@@ -190,7 +190,7 @@ export const THEMES = {
   dinos: {
     name: 'Dinossauros',
     emoji: '🦕',
-    color: '#A3E635',
+    color: '#4D7C0F',
     cat: 'animais',
     items: [
       item('T-Rex', 'T-Rex'),
@@ -219,7 +219,7 @@ export const THEMES = {
   profissoes: {
     name: 'Profissões',
     emoji: '👷',
-    color: '#C084FC',
+    color: '#7C3AED',
     cat: 'educativo',
     items: [
       item('doctor', 'Médico'),
@@ -248,7 +248,7 @@ export const THEMES = {
   veiculos: {
     name: 'Veículos',
     emoji: '🚗',
-    color: '#FB923C',
+    color: '#C2410C',
     cat: 'educativo',
     items: [
       item('car', 'Carro'),
@@ -277,7 +277,7 @@ export const THEMES = {
   esportes: {
     name: 'Esportes',
     emoji: '⚽',
-    color: '#34D399',
+    color: '#047857',
     cat: 'educativo',
     items: [
       item('soccer', 'Futebol'),
@@ -306,7 +306,7 @@ export const THEMES = {
   frutas: {
     name: 'Frutas & Vegetais',
     emoji: '🍎',
-    color: '#F97316',
+    color: '#C2410C',
     cat: 'educativo',
     items: [
       item('apple', 'Maçã'),
@@ -335,7 +335,7 @@ export const THEMES = {
   espaco: {
     name: 'Espaço & Planetas',
     emoji: '🚀',
-    color: '#A78BFA',
+    color: '#6D28D9',
     cat: 'personagens',
     items: [
       item('rocket', 'Foguete'),
@@ -364,7 +364,7 @@ export const THEMES = {
   princesas: {
     name: 'Princesas & Fadas',
     emoji: '👑',
-    color: '#F472B6',
+    color: '#BE185D',
     cat: 'personagens',
     items: [
       item('princess', 'Princesa'),
@@ -393,7 +393,7 @@ export const THEMES = {
   natal: {
     name: 'Natal',
     emoji: '🎄',
-    color: '#4ADE80',
+    color: '#15803D',
     cat: 'datas',
     items: [
       item('Santa Claus', 'Papai Noel'),
@@ -422,7 +422,7 @@ export const THEMES = {
   pascoa: {
     name: 'Páscoa',
     emoji: '🐰',
-    color: '#86EFAC',
+    color: '#16A34A',
     cat: 'datas',
     items: [
       item('Easter bunny', 'Coelho da Páscoa'),
@@ -451,7 +451,7 @@ export const THEMES = {
   halloween: {
     name: 'Halloween',
     emoji: '🎃',
-    color: '#FB923C',
+    color: '#C2410C',
     cat: 'datas',
     items: [
       item('pumpkin', 'Abóbora'),

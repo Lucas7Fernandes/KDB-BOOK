@@ -7,7 +7,7 @@ const STATUS_MAP = {
   planejado: { label: 'Planejado',     color: 'var(--text-muted)' },
   producao:  { label: 'Em produção',   color: 'var(--accent)' },
   gerado:    { label: 'Imagens ✓',     color: 'var(--info)' },
-  revisao:   { label: 'Revisão',       color: '#C084FC' },
+  revisao:   { label: 'Revisão',       color: 'var(--indigo)' },
   publicado: { label: 'Publicado',     color: 'var(--success)' },
 };
 

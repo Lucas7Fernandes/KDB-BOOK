@@ -53,9 +53,10 @@ export function GenerateTab({
               style={
                 activeTheme === id
                   ? {
-                      background: `${t.color}22`,
-                      borderColor: t.color,
-                      color: t.color,
+                      background: 'var(--accent-bg)',
+                      borderColor: 'var(--accent)',
+                      color: 'var(--accent)',
+                      fontWeight: 700,
                     }
                   : {}
               }

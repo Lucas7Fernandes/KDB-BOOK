@@ -3,7 +3,6 @@ import { formatNumber, formatCurrency } from '../lib/format.js';
 
 /**
  * Barra de estatísticas global da sessão.
- * Aparece logo abaixo do header e fica sempre visível.
  */
 export function Dashboard({
   balanceInput,
@@ -23,8 +22,8 @@ export function Dashboard({
   return (
     <div className="dashboard">
       <DashboardCell label="Saldo Replicate">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-lg)' }}>$</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-lg)', fontWeight: 600 }}>$</span>
           <input
             type="number"
             value={balanceInput}
@@ -102,9 +101,10 @@ export function Dashboard({
       <DashboardCell label="Tema ativo">
         <span
           className="dashboard-value"
-          style={{ color: theme.color, fontSize: 'var(--text-lg)' }}
+          style={{ color: 'var(--accent)', fontSize: 'var(--text-lg)', display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
-          {theme.emoji} {theme.name.split(' ')[0]}
+          <span>{theme.emoji}</span>
+          <span>{theme.name.split(' ')[0]}</span>
         </span>
       </DashboardCell>
     </div>

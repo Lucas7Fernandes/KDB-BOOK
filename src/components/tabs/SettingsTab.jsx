@@ -115,7 +115,7 @@ export function SettingsTab({
       <SectionGroup label="Zona de perigo">
         <div
           style={{
-            background: 'rgba(248, 113, 113, 0.04)',
+            background: 'var(--error-bg)',
             border: '1px solid var(--error-border)',
             borderRadius: 'var(--radius-lg)',
             padding: 'var(--space-4)',
