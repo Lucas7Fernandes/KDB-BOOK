@@ -97,3 +97,43 @@ export function buildFluxPrompt(item, themeId) {
     `IMPORTANT: this is for a children's coloring book. Just line art. No color. Pure white background.`,
   ].join(' ');
 }
+
+/**
+ * Prompt para CAPA do livro — colorida, fofa e vibrante (diferente do
+ * interior que é line art). Sem texto na imagem: o título é adicionado
+ * no Canva para tipografia perfeita.
+ */
+export function buildCoverPrompt(theme, themeId) {
+  const stars = theme.items.slice(0, 4).map((i) => i.en).join(', ');
+  const habitatHint = {
+    selva: 'lush green jungle with tropical leaves and flowers',
+    fazenda: 'sunny farm with red barn and rolling green hills',
+    oceano: 'bright underwater world with coral and bubbles',
+    floresta: 'magical forest with tall trees and mushrooms',
+    artico: 'sparkling snowy landscape with ice and northern lights',
+    domesticos: 'cozy colorful home interior',
+    dinos: 'prehistoric land with volcano and giant ferns',
+    profissoes: 'cheerful town scene with buildings',
+    veiculos: 'fun city road with sky and clouds',
+    esportes: 'bright sports field with confetti',
+    frutas: 'sunny orchard garden full of plants',
+    espaco: 'deep space with colorful planets and twinkling stars',
+    princesas: 'magical pink and purple fairytale kingdom with castle',
+    natal: 'snowy christmas village with lights and decorations',
+    pascoa: 'spring meadow full of colorful flowers',
+    halloween: 'friendly halloween night with smiling moon and pumpkins',
+  }[themeId] || 'colorful cheerful scene';
+
+  return [
+    `Children's coloring book COVER illustration, full vibrant colors.`,
+    `Subject: adorable cute kawaii-style ${stars}, happy smiling faces, big sparkling eyes,`,
+    `grouped together in a joyful composition in a ${habitatHint}.`,
+    `Style: modern children's book illustration, soft rounded shapes, thick clean outlines,`,
+    `bright saturated cheerful color palette, smooth digital art, professional quality.`,
+    `Composition: characters fill the center, decorative elements around the edges,`,
+    `generous empty space at the TOP THIRD of the image for title text placement.`,
+    `Mood: joyful, warm, inviting, irresistibly cute, perfect for kids ages 3-8.`,
+    `NO text, NO words, NO letters anywhere in the image.`,
+    `Portrait orientation, book cover format.`,
+  ].join(' ');
+}

@@ -343,7 +343,7 @@ export default function App() {
         )}
 
         {tab === 'canva' && (
-          <CanvaTab activeTheme={activeTheme} history={history} showToast={showToast} />
+          <CanvaTab activeTheme={activeTheme} history={history} webhookUrl={webhookUrl} showToast={showToast} />
         )}
 
         {tab === 'history' && (

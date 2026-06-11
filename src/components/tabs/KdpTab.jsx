@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { KDP_STEPS } from '../../data/kdp-steps.js';
 import { THEMES } from '../../data/themes.js';
 import { Button, SectionGroup } from '../ui.jsx';
-import { generateDescription } from '../../lib/api.js';
+import { buildDescription } from '../../lib/description.js';
 
 /**
  * Aba KDP — checklist visual de 12 passos para publicação + formulário
@@ -17,7 +17,6 @@ export function KdpTab({
   showToast,
 }) {
   const [openTip, setOpenTip] = useState(null);
-  const [genLoading, setGenLoading] = useState(false);
 
   const doneCount = Object.values(kdpCheck).filter(Boolean).length;
   const theme = THEMES[activeTheme] || Object.values(THEMES)[0];
@@ -25,18 +24,10 @@ export function KdpTab({
   const toggleStep = (id) => setKdpCheck({ ...kdpCheck, [id]: !kdpCheck[id] });
   const updateMeta = (field, value) => setKdpMeta({ ...kdpMeta, [field]: value });
 
-  const generateDesc = async () => {
-    setGenLoading(true);
-    showToast('Gerando descrição com IA...');
-    try {
-      const desc = await generateDescription(theme, kdpMeta);
-      setKdpMeta({ ...kdpMeta, desc });
-      showToast('Descrição gerada com sucesso!');
-    } catch (err) {
-      showToast(`Erro: ${err.message}`, 'error');
-    } finally {
-      setGenLoading(false);
-    }
+  const generateDesc = () => {
+    const desc = buildDescription(theme, kdpMeta);
+    setKdpMeta({ ...kdpMeta, desc });
+    showToast('✨ Descrição gerada! (em inglês, otimizada para Amazon.com)');
   };
 
   return (
@@ -194,9 +185,8 @@ export function KdpTab({
             <Button
               variant="accent"
               onClick={generateDesc}
-              disabled={genLoading}
             >
-              {genLoading ? '⏳ Gerando...' : '🤖 Gerar com IA'}
+              ✨ Gerar descrição
             </Button>
             <span
               style={{

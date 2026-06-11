@@ -8,7 +8,7 @@ export function Header({ tab, setTab, historyCount, kdpDone }) {
     ['financas', '📊', 'Finanças'],
     ['kdp', '🚀', `KDP${kdpDone > 0 ? ` ${kdpDone}/12` : ''}`],
     ['seo', '🔍', 'SEO'],
-    ['canva', '📐', 'Canva'],
+    ['canva', '🎨', 'Capa'],
     ['history', '📂', `Histórico${historyCount > 0 ? ` (${historyCount})` : ''}`],
     ['config', '⚙', 'Config'],
   ];
