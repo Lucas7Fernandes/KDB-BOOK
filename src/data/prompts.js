@@ -37,6 +37,28 @@ const THEME_HABITATS = {
   halloween:   'spooky but kid-friendly scene with simple moon, bare tree branches, small pumpkins on ground',
 };
 
+
+/**
+ * Estilos de desenho disponíveis para o interior do livro.
+ */
+export const ART_STYLES = {
+  classic: {
+    name: 'Clássico',
+    emoji: '🦁',
+    description: 'Anatomia correta, habitat do tema',
+  },
+  cozy: {
+    name: 'Cozy',
+    emoji: '🍪',
+    description: 'Cena aconchegante com objetinhos fofos',
+  },
+  baby: {
+    name: 'Baby',
+    emoji: '🐣',
+    description: 'Bebê chibi, cabeça grande, olhos gigantes',
+  },
+};
+
 /**
  * Artigo correto em inglês baseado no início da palavra.
  * Ex: "elephant" → "an", "lion" → "a"
@@ -73,13 +95,56 @@ function subjectType(themeId, itemEn) {
  * @param {string} themeId - chave do tema (selva, fazenda, etc)
  * @returns {string} prompt completo pronto para FLUX
  */
-export function buildFluxPrompt(item, themeId) {
+export function buildFluxPrompt(item, themeId, style = 'classic') {
   const habitat = THEME_HABITATS[themeId] || 'simple clean background with minimal decorative elements';
   const type = subjectType(themeId, item.en);
-  const subjectLine =
-    type === 'animal'
-      ? `a friendly cute ${item.en}, anatomically correct, with expressive happy face, full body visible`
-      : `${article(item.en)} ${item.en}, child-friendly cartoon style, clear and recognizable`;
+  const isAnimal = type === 'animal';
+
+  /* ── Estilo BABY: bebê chibi, cabeça enorme, olhos gigantes ── */
+  if (style === 'baby') {
+    return [
+      `A black and white children's coloring book illustration of an adorable BABY ${item.en}, kawaii chibi style.`,
+      `Character design (CRITICAL): oversized head taking up about HALF of the total body size,`,
+      `HUGE round sparkling eyes with big white highlight circles, tiny chubby rounded body,`,
+      `small sweet gentle smile, soft rounded simple shapes, irresistibly cute baby proportions.`,
+      `Drawing rules (CRITICAL):`,
+      `- EXTRA THICK bold black outlines, very chunky lines`,
+      `- PURE WHITE background, completely EMPTY background, no scenery`,
+      `- NO shading, NO gray tones, NO color, NO gradients`,
+      `- Very simple, minimal details, perfect for toddlers ages 2 to 5`,
+      `- All shapes CLOSED so kids can color inside`,
+      `Composition: the baby character fills 75 percent of the frame, centered, full body visible.`,
+      `Format: portrait orientation, ready for 8.5 x 11 inch KDP coloring book printing.`,
+      `IMPORTANT: just bold line art, no color, empty white background.`,
+    ].join(' ');
+  }
+
+  /* ── Estilo COZY: cena aconchegante estilo cozy/wholesome ── */
+  if (style === 'cozy') {
+    const activity = isAnimal
+      ? 'doing a wholesome cozy activity like having a picnic, holding a tiny flower, sipping from a teacup, or reading a little book'
+      : 'in a charming cozy wholesome setting';
+    return [
+      `A black and white children's coloring book illustration of a cute chibi ${item.en}, cozy wholesome style.`,
+      `Scene: the character is ${activity},`,
+      `surrounded by small adorable decorative objects: tiny hearts, little stars, small flowers, sparkles, cookies, or mushrooms.`,
+      `Character design: rounded squishy soft proportions, simple dot eyes, tiny happy smile, plump cheeks, very huggable look.`,
+      `Drawing rules (CRITICAL):`,
+      `- THICK clean uniform black outlines throughout`,
+      `- PURE WHITE background with only the small cute objects floating around`,
+      `- NO shading, NO gray, NO color fills, NO gradients`,
+      `- Simple rounded lines, cozy warm wholesome atmosphere`,
+      `- All shapes CLOSED for easy coloring`,
+      `Composition: character fills 65 percent of the frame, cute objects scattered around the edges.`,
+      `Format: portrait orientation, ready for 8.5 x 11 inch KDP coloring book printing.`,
+      `IMPORTANT: just line art for coloring, no color anywhere.`,
+    ].join(' ');
+  }
+
+  /* ── Estilo CLASSIC (padrão): anatomia correta + habitat ── */
+  const subjectLine = isAnimal
+    ? `a friendly cute ${item.en}, anatomically correct, with expressive happy face, full body visible`
+    : `${article(item.en)} ${item.en}, child-friendly cartoon style, clear and recognizable`;
 
   return [
     `A black and white children's coloring book illustration of ${subjectLine}.`,

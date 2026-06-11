@@ -64,6 +64,7 @@ export default function App() {
   const [kdpCheck, setKdpCheck] = usePersistedJSON(STORAGE_KEYS.KDP_CHECK, {});
   const [kdpMeta, setKdpMeta] = usePersistedJSON(STORAGE_KEYS.KDP_META, DEFAULT_KDP_META);
   const [activeTheme, setActiveTheme] = usePersistedState(STORAGE_KEYS.ACTIVE_THEME, 'selva');
+  const [artStyle, setArtStyle] = usePersistedState(STORAGE_KEYS.ART_STYLE, 'classic');
 
   // ── Estado de UI (não persistido) ──
   const [tab, setTab] = useState('gerar');
@@ -140,7 +141,7 @@ export default function App() {
       try {
         const data = await generateImage(
           item,
-          { webhookUrl, themeId: activeTheme },
+          { webhookUrl, themeId: activeTheme, style: artStyle },
           controller.signal
         );
 
@@ -186,7 +187,7 @@ export default function App() {
         return 'error';
       }
     },
-    [webhookUrl, activeTheme, setHistory]
+    [webhookUrl, activeTheme, artStyle, setHistory]
   );
 
   // ── Generation handlers ──
@@ -320,6 +321,8 @@ export default function App() {
         {tab === 'gerar' && (
           <GenerateTab
             activeTheme={activeTheme}
+            artStyle={artStyle}
+            setArtStyle={setArtStyle}
             switchTheme={switchTheme}
             themeItems={themeItems}
             selected={selected}

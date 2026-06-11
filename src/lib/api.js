@@ -38,13 +38,13 @@ async function postWebhook(webhookUrl, fields, signal) {
  * Gera uma imagem de colorir (line art) para um item.
  */
 export async function generateImage(item, options, signal) {
-  const { webhookUrl, themeId } = options;
+  const { webhookUrl, themeId, style } = options;
   return postWebhook(
     webhookUrl,
     {
       animal_en: item.en,
       animal_pt: item.pt,
-      flux_prompt: buildFluxPrompt(item, themeId),
+      flux_prompt: buildFluxPrompt(item, themeId, style),
       theme: themeId,
     },
     signal

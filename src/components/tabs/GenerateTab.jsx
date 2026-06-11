@@ -1,6 +1,7 @@
 import { THEMES } from '../../data/themes.js';
 import { CONFIG } from '../../data/config.js';
 import { getItemEmoji } from '../../data/item-emojis.js';
+import { ART_STYLES } from '../../data/prompts.js';
 import { Button } from '../ui.jsx';
 import { ResultCard } from '../ResultCard.jsx';
 
@@ -9,6 +10,8 @@ import { ResultCard } from '../ResultCard.jsx';
  */
 export function GenerateTab({
   activeTheme,
+  artStyle,
+  setArtStyle,
   switchTheme,
   themeItems,
   selected,
@@ -66,6 +69,62 @@ export function GenerateTab({
               {t.emoji} <span style={{ fontSize: 'var(--text-sm)' }}>{t.name.split(' ')[0]}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+
+      {/* Style selector */}
+      <div style={{ marginBottom: 'var(--space-5)' }}>
+        <label className="section-label">Estilo do desenho</label>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 'var(--space-2)',
+            marginTop: 'var(--space-2)',
+            maxWidth: 640,
+          }}
+        >
+          {Object.entries(ART_STYLES).map(([id, s]) => {
+            const active = artStyle === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setArtStyle(id)}
+                aria-pressed={active}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 14px',
+                  borderRadius: 'var(--radius-lg)',
+                  border: `2px solid ${active ? 'var(--accent)' : 'var(--border-default)'}`,
+                  background: active ? 'var(--accent-bg)' : 'var(--bg-base)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all var(--transition-fast)',
+                  boxShadow: active ? 'var(--accent-glow)' : 'var(--shadow-xs)',
+                }}
+              >
+                <span style={{ fontSize: 26, lineHeight: 1 }} aria-hidden="true">{s.emoji}</span>
+                <span style={{ minWidth: 0 }}>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontSize: 'var(--text-md)',
+                      fontWeight: 700,
+                      color: active ? 'var(--accent)' : 'var(--text-primary)',
+                    }}
+                  >
+                    {s.name}
+                  </span>
+                  <span style={{ display: 'block', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                    {s.description}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
