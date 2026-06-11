@@ -162,6 +162,7 @@ export default function App() {
             animal_en: item.en,
             animal_pt: item.pt,
             image_url: data.image_url,
+            drive_file_id: data.drive_file_id || null,
             usage: data.usage,
             theme: activeTheme,
             elapsed,

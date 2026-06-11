@@ -35,6 +35,11 @@ export function HistoryTab({
     }
   };
 
+  const deleteItem = (id) => {
+    setHistory((prev) => prev.filter((h) => h.id !== id));
+    showToast('Imagem removida do histórico');
+  };
+
   const clearAll = () => {
     if (window.confirm('Apagar todo o histórico? Esta ação não pode ser desfeita.')) {
       setHistory([]);
@@ -57,6 +62,14 @@ export function HistoryTab({
           </div>
         )}
       </div>
+
+      {history.length > 0 && (
+        <p className="hint" style={{ marginBottom: 'var(--space-3)' }}>
+          ☁ Imagens com selo <b style={{ color: 'var(--success)' }}>Drive</b> são permanentes.
+          Para elas aparecerem aqui, compartilhe a pasta do Drive uma única vez:
+          botão direito na pasta → Compartilhar → "Qualquer pessoa com o link".
+        </p>
+      )}
 
       {history.length > 0 && (
         <div
@@ -94,7 +107,7 @@ export function HistoryTab({
       ) : (
         <div className="history-grid">
           {filtered.map((item) => (
-            <HistoryCard key={item.id} item={item} />
+            <HistoryCard key={item.id} item={item} onDelete={deleteItem} />
           ))}
         </div>
       )}

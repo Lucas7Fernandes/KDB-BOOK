@@ -8,6 +8,7 @@
  */
 
 import { THEMES } from '../data/themes.js';
+import { permanentImageUrl } from './format.js';
 
 /**
  * Filtra histórico por tema. "all" retorna tudo.
@@ -55,7 +56,7 @@ export function exportCSV(history, themeId) {
     [
       h.animal_pt,
       h.animal_en,
-      h.image_url || '',
+      permanentImageUrl(h),
       THEMES[h.theme]?.name || h.theme || '',
       h.elapsed,
       h.completedAt,
@@ -77,7 +78,8 @@ export function exportJSON(history, themeId) {
   const data = items.map((h) => ({
     animal_pt: h.animal_pt,
     animal_en: h.animal_en,
-    image_url: h.image_url,
+    image_url: permanentImageUrl(h),
+    replicate_url: h.image_url || '',
     theme: h.theme || '',
     theme_name: THEMES[h.theme]?.name || '',
     elapsed_seconds: parseFloat(h.elapsed),
@@ -128,7 +130,7 @@ export function exportInteriorHTML(history, themeId, meta = {}) {
     .map(
       (h) => `
     <div class="page">
-      <img src="${h.image_url}" alt="${h.animal_pt}" onerror="this.style.opacity=.2" />
+      <img src="${permanentImageUrl(h)}" alt="${h.animal_pt}" onerror="this.style.opacity=.2" />
       <p class="label">${h.animal_pt}</p>
     </div>`
     )

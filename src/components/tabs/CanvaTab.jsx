@@ -3,6 +3,7 @@ import { THEMES } from '../../data/themes.js';
 import { getItemEmoji } from '../../data/item-emojis.js';
 import { generateCover } from '../../lib/api.js';
 import { exportHistory } from '../../lib/export.js';
+import { permanentImageUrl } from '../../lib/format.js';
 import { SectionGroup, Button, EmptyState, Spinner } from '../ui.jsx';
 
 /**
@@ -44,7 +45,7 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
     else showToast('Sem itens no histórico deste tema', 'error');
   };
 
-  const latestCover = cover?.image_url || savedCovers[0]?.image_url;
+  const latestCover = (cover && permanentImageUrl(cover)) || (savedCovers[0] && permanentImageUrl(savedCovers[0]));
 
   return (
     <div style={{ maxWidth: 960 }}>
@@ -214,7 +215,7 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
           <div className="history-grid">
             {themeHistory.slice(0, 12).map((h) => (
               <div key={h.id} className="card">
-                <img src={h.image_url} alt={h.animal_pt} className="result-image" loading="lazy" />
+                <img src={permanentImageUrl(h)} alt={h.animal_pt} className="result-image" loading="lazy" />
                 <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 'var(--text-lg)', lineHeight: 1 }} aria-hidden="true">
                     {getItemEmoji(h.animal_en, theme.emoji)}

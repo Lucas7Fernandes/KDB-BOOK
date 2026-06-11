@@ -34,3 +34,16 @@ export function sumTokens(usage) {
   if (!usage?.claude) return 0;
   return (usage.claude.input_tokens || 0) + (usage.claude.output_tokens || 0);
 }
+
+/**
+ * URL permanente da imagem: prioriza o Google Drive (não expira),
+ * com fallback para a URL do Replicate (expira em ~1h).
+ * Requer que a pasta do Drive esteja compartilhada como
+ * "Qualquer pessoa com o link pode ver".
+ */
+export function permanentImageUrl(item) {
+  if (item?.drive_file_id) {
+    return `https://lh3.googleusercontent.com/d/${item.drive_file_id}`;
+  }
+  return item?.image_url || '';
+}
