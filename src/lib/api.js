@@ -30,7 +30,11 @@ export async function generateImage(item, options, signal) {
   const { webhookUrl, themeId } = options;
   const fluxPrompt = buildFluxPrompt(item, themeId);
 
-  const payload = JSON.stringify({
+  // application/x-www-form-urlencoded:
+  //   1. É "simple CORS request" — sem preflight OPTIONS (Make nao responde OPTIONS)
+  //   2. Make.com parseia os campos nativamente (text/plain NAO era parseado,
+  //      fazendo flux_prompt e animal_en chegarem vazios no pipeline)
+  const params = new URLSearchParams({
     animal_en: item.en,
     animal_pt: item.pt,
     flux_prompt: fluxPrompt,
@@ -39,8 +43,8 @@ export async function generateImage(item, options, signal) {
 
   const response = await fetch(webhookUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-    body: payload,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
     signal,
     mode: 'cors',
   });
