@@ -7,7 +7,7 @@ import { StatusBadge, Stat, Spinner, ElapsedTimer } from './ui.jsx';
  * Card individual de resultado de geração de imagem.
  * Exibe estados: pending, generating, done, error.
  */
-export function ResultCard({ itemKey, generation, themeEmoji }) {
+export function ResultCard({ itemKey, generation, themeEmoji, onRegenerate }) {
   const tokens = generation.usage ? sumTokens(generation.usage) : null;
   const cost = generation.usage?.replicate?.cost_usd ?? CONFIG.COST_PER_IMAGE;
   const emoji = getItemEmoji(itemKey, themeEmoji);
@@ -50,7 +50,16 @@ export function ResultCard({ itemKey, generation, themeEmoji }) {
       )}
 
       {generation.status === 'error' && (
-        <div className="result-error">{generation.error}</div>
+        <>
+          <div className="result-error">{generation.error}</div>
+          {onRegenerate && (
+            <div className="card-footer">
+              <button className="btn btn-accent" onClick={() => onRegenerate(itemKey)}>
+                🔄 Tentar novamente
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {generation.status === 'done' && generation.image_url && (
@@ -73,19 +82,36 @@ export function ResultCard({ itemKey, generation, themeEmoji }) {
             {generation.elapsed && <Stat label="Tempo" value={`${generation.elapsed}s`} />}
             {tokens !== null && <Stat label="Tokens" value={formatNumber(tokens)} />}
             <Stat label="Custo" value={`$${cost.toFixed(2)}`} highlight />
-            <a
-              href={generation.image_url}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                marginLeft: 'auto',
-                fontSize: 'var(--text-base)',
-                color: 'var(--accent)',
-                fontWeight: 600,
-              }}
-            >
-              ↗ Abrir
-            </a>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 10, alignItems: 'center' }}>
+              {onRegenerate && (
+                <button
+                  onClick={() => onRegenerate(itemKey)}
+                  title="Gerar novamente ($0.03)"
+                  style={{
+                    fontSize: 'var(--text-base)',
+                    color: 'var(--text-muted)',
+                    fontWeight: 600,
+                    transition: 'color var(--transition-fast)',
+                  }}
+                  onMouseEnter={(e) => { e.target.style.color = 'var(--accent)'; }}
+                  onMouseLeave={(e) => { e.target.style.color = 'var(--text-muted)'; }}
+                >
+                  🔄 Regenerar
+                </button>
+              )}
+              <a
+                href={generation.image_url}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: 'var(--text-base)',
+                  color: 'var(--accent)',
+                  fontWeight: 600,
+                }}
+              >
+                ↗ Abrir
+              </a>
+            </span>
           </div>
         </>
       )}

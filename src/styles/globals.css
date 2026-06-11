@@ -1104,3 +1104,44 @@ input:focus, textarea:focus, select:focus {
 @media print {
   body { background: white; color: black; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   POLIMENTOS VISUAIS v1.2
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Grid uniforme: FLUX gera 3:4, fixamos o ratio para cards alinhados */
+.result-image {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background:
+    linear-gradient(110deg, var(--bg-surface-2) 8%, var(--bg-elevated) 18%, var(--bg-surface-2) 33%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.result-image[src] {
+  animation: none;
+}
+
+@keyframes shimmer {
+  to { background-position-x: -200%; }
+}
+
+/* Zoom sutil no hover das thumbnails */
+.result-image-link {
+  overflow: hidden;
+  display: block;
+}
+
+.result-image-link .result-image {
+  transition: transform var(--transition-slow);
+}
+
+.result-image-link:hover .result-image {
+  transform: scale(1.03);
+}
+
+/* Footer dos cards com wrap melhor no mobile */
+@media (max-width: 480px) {
+  .card-footer { gap: var(--space-2); }
+}

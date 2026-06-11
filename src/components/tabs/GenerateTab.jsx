@@ -24,6 +24,7 @@ export function GenerateTab({
   generations,
   running,
   handleGenerate,
+  handleRegenerate,
   progressDone,
   progressTotal,
 }) {
@@ -162,6 +163,7 @@ export function GenerateTab({
                 itemKey={en}
                 generation={g}
                 themeEmoji={theme.emoji}
+                onRegenerate={handleRegenerate}
               />
             ))}
           </div>

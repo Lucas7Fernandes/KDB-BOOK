@@ -228,6 +228,25 @@ export default function App() {
     await generateOne({ en, pt });
   };
 
+  /**
+   * Regenera um item individual ($0.03). Busca o item no tema ativo
+   * ou reconstrói a partir do estado de generations (itens customizados).
+   */
+  const handleRegenerate = useCallback(
+    async (en) => {
+      const item =
+        themeItems.find((i) => i.en === en) ||
+        (generations[en]?.animal_pt ? { en, pt: generations[en].animal_pt } : null);
+      if (!item) {
+        showToast('Item não encontrado para regenerar', 'error');
+        return;
+      }
+      showToast(`🔄 Regenerando ${item.pt}...`);
+      await generateOne(item);
+    },
+    [themeItems, generations, generateOne, showToast]
+  );
+
   // ── Selection handlers ──
   const toggleSelect = (en) => {
     setSelected((prev) => {
@@ -299,6 +318,7 @@ export default function App() {
             generations={generations}
             running={running}
             handleGenerate={handleGenerate}
+            handleRegenerate={handleRegenerate}
             progressDone={doneCount}
             progressTotal={generationTotal}
           />
@@ -343,12 +363,13 @@ export default function App() {
         )}
 
         {tab === 'canva' && (
-          <CanvaTab activeTheme={activeTheme} history={history} webhookUrl={webhookUrl} showToast={showToast} />
+          <CanvaTab activeTheme={activeTheme} history={history} webhookUrl={webhookUrl} kdpMeta={kdpMeta} showToast={showToast} />
         )}
 
         {tab === 'history' && (
           <HistoryTab
             history={history}
+            kdpMeta={kdpMeta}
             setHistory={setHistory}
             historyFilter={historyFilter}
             setHistoryFilter={setHistoryFilter}

@@ -93,16 +93,36 @@ export function exportJSON(history, themeId) {
 }
 
 /**
- * Exporta um HTML print-ready com 1 imagem por página em formato 8.5"×11" (KDP).
+ * Exporta um HTML print-ready com páginas de abertura (título + "This book
+ * belongs to") e 1 imagem por página em formato 8.5"×11" (KDP).
  * Para gerar o PDF: abra o HTML no navegador → Ctrl+P → Salvar como PDF.
  */
-export function exportInteriorHTML(history, themeId) {
+export function exportInteriorHTML(history, themeId, meta = {}) {
   const items = filterByTheme(history, themeId);
   if (items.length === 0) return { ok: false, count: 0 };
 
   const themeName = themeId === 'all'
     ? 'Coloring Book'
     : THEMES[themeId]?.name || themeId;
+
+  const bookTitle = meta.title?.trim() || `${themeName} — Coloring Book`;
+  const bookSubtitle = meta.subtitle?.trim() || `${items.length} cute designs to color`;
+
+  const openingPages = `
+    <div class="page title-page">
+      <div class="title-frame">
+        <p class="title-main">${bookTitle}</p>
+        <div class="title-divider"></div>
+        <p class="title-sub">${bookSubtitle}</p>
+      </div>
+    </div>
+    <div class="page belongs-page">
+      <div class="belongs-frame">
+        <p class="belongs-label">This book belongs to</p>
+        <div class="belongs-line"></div>
+        <p class="belongs-hint">★ ☆ ★</p>
+      </div>
+    </div>`;
 
   const pages = items
     .map(
@@ -115,10 +135,10 @@ export function exportInteriorHTML(history, themeId) {
     .join('');
 
   const content = `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>${themeName} — KDP Interior</title>
+  <title>${bookTitle} — KDP Interior</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     @page {
@@ -150,9 +170,58 @@ export function exportInteriorHTML(history, themeId) {
       color: #333;
       letter-spacing: 0.05em;
     }
+    /* ── Title page ── */
+    .title-frame {
+      border: 4px solid #000;
+      border-radius: 24px;
+      padding: 80px 60px;
+      text-align: center;
+      max-width: 80%;
+    }
+    .title-main {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.25;
+      letter-spacing: 0.01em;
+    }
+    .title-divider {
+      width: 120px;
+      height: 4px;
+      background: #000;
+      border-radius: 4px;
+      margin: 28px auto;
+    }
+    .title-sub {
+      font-size: 20px;
+      color: #444;
+      letter-spacing: 0.06em;
+    }
+    /* ── Belongs page ── */
+    .belongs-frame {
+      border: 3px dashed #000;
+      border-radius: 20px;
+      padding: 70px 80px;
+      text-align: center;
+    }
+    .belongs-label {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 48px;
+      letter-spacing: 0.04em;
+    }
+    .belongs-line {
+      width: 320px;
+      border-bottom: 3px solid #000;
+      margin: 0 auto 40px;
+      height: 48px;
+    }
+    .belongs-hint {
+      font-size: 24px;
+      letter-spacing: 0.5em;
+    }
   </style>
 </head>
-<body>${pages}</body>
+<body>${openingPages}${pages}</body>
 </html>`;
 
   downloadBlob(content, `interior-${themeId}.html`, 'text/html');
@@ -162,11 +231,11 @@ export function exportInteriorHTML(history, themeId) {
 /**
  * Função única de dispatch para todos os formatos.
  */
-export function exportHistory(history, themeId, format) {
+export function exportHistory(history, themeId, format, meta = {}) {
   switch (format) {
     case 'csv': return exportCSV(history, themeId);
     case 'json': return exportJSON(history, themeId);
-    case 'html': return exportInteriorHTML(history, themeId);
+    case 'html': return exportInteriorHTML(history, themeId, meta);
     default: throw new Error(`Formato desconhecido: ${format}`);
   }
 }

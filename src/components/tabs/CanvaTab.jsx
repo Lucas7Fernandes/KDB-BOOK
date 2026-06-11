@@ -9,7 +9,7 @@ import { SectionGroup, Button, EmptyState, Spinner } from '../ui.jsx';
  * Aba Capa — gera arte de capa colorida e fofa via FLUX (mesmo pipeline),
  * com fluxo guiado para finalizar o título no Canva.
  */
-export function CanvaTab({ activeTheme, history, webhookUrl, showToast }) {
+export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast }) {
   const [loading, setLoading] = useState(false);
   const [cover, setCover] = useState(null);
   const [error, setError] = useState(null);
@@ -39,7 +39,7 @@ export function CanvaTab({ activeTheme, history, webhookUrl, showToast }) {
   };
 
   const doExport = (format) => {
-    const result = exportHistory(themeHistory, activeTheme, format);
+    const result = exportHistory(themeHistory, activeTheme, format, kdpMeta || {});
     if (result.ok) showToast(`Export ${format.toUpperCase()}: ${result.count} itens`);
     else showToast('Sem itens no histórico deste tema', 'error');
   };

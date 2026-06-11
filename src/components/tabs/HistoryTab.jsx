@@ -10,6 +10,7 @@ import { HistoryCard } from '../HistoryCard.jsx';
  */
 export function HistoryTab({
   history,
+  kdpMeta,
   setHistory,
   historyFilter,
   setHistoryFilter,
@@ -26,7 +27,7 @@ export function HistoryTab({
       : history.filter((h) => h.theme === historyFilter);
 
   const doExport = (format) => {
-    const result = exportHistory(history, historyFilter, format);
+    const result = exportHistory(history, historyFilter, format, kdpMeta || {});
     if (result.ok) {
       showToast(`Export ${format.toUpperCase()}: ${result.count} itens`);
     } else {
