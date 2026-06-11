@@ -8,6 +8,7 @@ import { usePersistedState, usePersistedJSON } from './hooks/usePersistedState.j
 import { useToast } from './hooks/useToast.js';
 import { generateImage } from './lib/api.js';
 import { calculateRoyalty, sumTokens } from './lib/format.js';
+import { initNotifications, requestNotifyPermission, notify } from './lib/notify.js';
 
 import { Header } from './components/Header.jsx';
 import { Dashboard } from './components/Dashboard.jsx';
@@ -112,8 +113,9 @@ export default function App() {
   const generationTotal = Object.keys(generations).length;
   const progressPercent = generationTotal > 0 ? Math.round((doneCount / generationTotal) * 100) : 0;
 
-  // ── Limpeza de aborts ao desmontar ──
+  // ── Service worker p/ notificações + limpeza de aborts ──
   useEffect(() => {
+    initNotifications();
     return () => {
       abortControllersRef.current.forEach((c) => c.abort());
     };
@@ -170,8 +172,9 @@ export default function App() {
           },
           ...prev,
         ].slice(0, CONFIG.HISTORY_LIMIT));
+        return 'done';
       } catch (err) {
-        if (err.name === 'AbortError') return;
+        if (err.name === 'AbortError') return 'aborted';
         setGenerations((prev) => ({
           ...prev,
           [item.en]: {
@@ -180,6 +183,7 @@ export default function App() {
             animal_pt: item.pt,
           },
         }));
+        return 'error';
       }
     },
     [webhookUrl, activeTheme, setHistory]
@@ -189,6 +193,7 @@ export default function App() {
   const handleGenerate = async () => {
     if (running) return;
 
+    requestNotifyPermission(); // gesto do usuário: momento certo de pedir
     setRunning(true);
 
     const itemsToGenerate = Array.from(selected)
@@ -205,9 +210,16 @@ export default function App() {
     });
 
     // Fire in parallel
-    await Promise.all(itemsToGenerate.map((item) => generateOne(item)));
+    const results = await Promise.all(itemsToGenerate.map((item) => generateOne(item)));
 
     setRunning(false);
+
+    const ok = results.filter((r) => r === 'done').length;
+    const failed = results.filter((r) => r === 'error').length;
+    notify(
+      failed === 0 ? '🎨 Geração concluída!' : '🎨 Geração concluída (com erros)',
+      `${ok} de ${itemsToGenerate.length} imagens prontas${failed ? ` · ${failed} com erro` : ''} — ${theme.name}`
+    );
 
     // Mark theme as "gerado" if all items completed successfully
     if (itemsToGenerate.length === themeItems.length && itemsToGenerate.length > 0) {
@@ -225,8 +237,10 @@ export default function App() {
     }
     setCustomEn('');
     setCustomPt('');
+    requestNotifyPermission();
     showToast(`Gerando ${pt}...`);
-    await generateOne({ en, pt });
+    const result = await generateOne({ en, pt });
+    if (result === 'done') notify('✨ Imagem pronta!', `${pt} foi gerada com sucesso`);
   };
 
   /**
@@ -242,8 +256,10 @@ export default function App() {
         showToast('Item não encontrado para regenerar', 'error');
         return;
       }
+      requestNotifyPermission();
       showToast(`🔄 Regenerando ${item.pt}...`);
-      await generateOne(item);
+      const result = await generateOne(item);
+      if (result === 'done') notify('✨ Imagem pronta!', `${item.pt} foi regenerada`);
     },
     [themeItems, generations, generateOne, showToast]
   );
