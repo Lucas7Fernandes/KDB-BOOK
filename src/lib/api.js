@@ -1,17 +1,19 @@
 /**
  * Camada de cliente HTTP para os serviços externos.
  *
- * Estratégia CORS (resolve "Failed to fetch" em webhooks Make.com):
- *   - Usamos Content-Type: text/plain;charset=UTF-8 em vez de application/json
- *   - Isso converte a chamada em "simple CORS request" — o browser NÃO faz
- *     preflight OPTIONS, indo direto ao POST. Como o Make.com não responde
- *     adequadamente ao OPTIONS preflight, isso evita o bloqueio CORS.
- *   - O body continua sendo JSON valido (string), e Make.com parseia normalmente.
+ * ─── CORS ───
+ * Usamos Content-Type: text/plain;charset=UTF-8 em vez de application/json.
+ * Isso converte a chamada em "simple CORS request" — o browser NÃO faz
+ * preflight OPTIONS, indo direto ao POST. Make.com aceita JSON no body
+ * mesmo com Content-Type text/plain.
  *
- * Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests
+ * ─── PROMPT FLUX ───
+ * Geramos o prompt completo no frontend (lib/data/prompts.js) e enviamos
+ * pronto no campo `flux_prompt`. Isso elimina a dependência do Claude
+ * Haiku no Make.com — basta o Make passar `flux_prompt` direto ao Replicate.
  */
 
-import { CONFIG } from '../data/config.js';
+import { buildFluxPrompt } from '../data/prompts.js';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
@@ -19,21 +21,25 @@ const CANVA_MCP_URL = 'https://mcp.canva.com/mcp';
 
 /**
  * Gera uma imagem para um item específico.
- * Usa Content-Type: text/plain para evitar CORS preflight.
+ *
+ * @param {{ en: string, pt: string }} item
+ * @param {{ webhookUrl: string, themeId: string }} options
+ * @param {AbortSignal} signal
  */
 export async function generateImage(item, options, signal) {
-  const { webhookUrl } = options;
+  const { webhookUrl, themeId } = options;
+  const fluxPrompt = buildFluxPrompt(item, themeId);
+
   const payload = JSON.stringify({
     animal_en: item.en,
     animal_pt: item.pt,
+    flux_prompt: fluxPrompt,
+    theme: themeId,
   });
 
   const response = await fetch(webhookUrl, {
     method: 'POST',
-    headers: {
-      // text/plain é "simple header" -> sem preflight OPTIONS
-      'Content-Type': 'text/plain;charset=UTF-8',
-    },
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body: payload,
     signal,
     mode: 'cors',
@@ -44,12 +50,10 @@ export async function generateImage(item, options, signal) {
     throw new Error(`HTTP ${response.status}: ${text.slice(0, 200) || response.statusText}`);
   }
 
-  // Make.com às vezes retorna text/plain mesmo quando o body é JSON
   const raw = await response.text();
   try {
     return JSON.parse(raw);
   } catch {
-    // Se não for JSON (Make ainda não configurado), retorna estrutura mínima
     throw new Error(`Resposta nao-JSON do webhook: ${raw.slice(0, 200)}`);
   }
 }

@@ -1,4 +1,5 @@
 import { CONFIG } from '../data/config.js';
+import { getItemEmoji } from '../data/item-emojis.js';
 import { formatNumber, sumTokens } from '../lib/format.js';
 import { StatusBadge, Stat, Spinner, ElapsedTimer } from './ui.jsx';
 
@@ -9,6 +10,7 @@ import { StatusBadge, Stat, Spinner, ElapsedTimer } from './ui.jsx';
 export function ResultCard({ itemKey, generation, themeEmoji }) {
   const tokens = generation.usage ? sumTokens(generation.usage) : null;
   const cost = generation.usage?.replicate?.cost_usd ?? CONFIG.COST_PER_IMAGE;
+  const emoji = getItemEmoji(itemKey, themeEmoji);
 
   const cardClass = `card fade-in-up ${
     generation.status === 'done' ? 'card-success' :
@@ -19,7 +21,7 @@ export function ResultCard({ itemKey, generation, themeEmoji }) {
     <div className={cardClass}>
       <div className="card-header">
         <span style={{ fontSize: 'var(--text-2xl)' }} aria-hidden="true">
-          {themeEmoji}
+          {emoji}
         </span>
         <div style={{ flex: 1 }}>
           <p className="result-title">{generation.animal_pt || itemKey}</p>

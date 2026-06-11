@@ -138,7 +138,7 @@ export default function App() {
       try {
         const data = await generateImage(
           item,
-          { webhookUrl, useProxy },
+          { webhookUrl, themeId: activeTheme },
           controller.signal
         );
 
@@ -181,7 +181,7 @@ export default function App() {
         }));
       }
     },
-    [webhookUrl, useProxy, activeTheme, setHistory]
+    [webhookUrl, activeTheme, setHistory]
   );
 
   // ── Generation handlers ──

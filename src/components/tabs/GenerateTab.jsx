@@ -1,5 +1,6 @@
 import { THEMES } from '../../data/themes.js';
 import { CONFIG } from '../../data/config.js';
+import { getItemEmoji } from '../../data/item-emojis.js';
 import { Button } from '../ui.jsx';
 import { ResultCard } from '../ResultCard.jsx';
 
@@ -86,8 +87,8 @@ export function GenerateTab({
               className={chipClass}
               aria-pressed={sel}
             >
-              <span style={{ fontSize: 'var(--text-xl)' }} aria-hidden="true">
-                {theme.emoji}
+              <span style={{ fontSize: 'var(--text-2xl)', lineHeight: 1 }} aria-hidden="true">
+                {getItemEmoji(item.en, theme.emoji)}
               </span>
               <span className="chip-title">{item.pt}</span>
               <span className="chip-subtitle">{item.en}</span>

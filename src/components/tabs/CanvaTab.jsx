@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { THEMES } from '../../data/themes.js';
+import { getItemEmoji } from '../../data/item-emojis.js';
 import { createCanvaCover } from '../../lib/api.js';
 import { exportHistory } from '../../lib/export.js';
 import { SectionGroup, Button, EmptyState } from '../ui.jsx';
@@ -153,13 +154,18 @@ export function CanvaTab({ activeTheme, history, showToast }) {
                   className="result-image"
                   loading="lazy"
                 />
-                <div style={{ padding: '8px 12px' }}>
-                  <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    {h.animal_pt}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 9, color: 'var(--text-disabled)' }}>
-                    {h.animal_en}
-                  </p>
+                <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 'var(--text-lg)', lineHeight: 1 }} aria-hidden="true">
+                    {getItemEmoji(h.animal_en, theme.emoji)}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {h.animal_pt}
+                    </p>
+                    <p style={{ margin: 0, fontSize: 9, color: 'var(--text-disabled)', fontFamily: 'var(--font-mono)' }}>
+                      {h.animal_en}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}

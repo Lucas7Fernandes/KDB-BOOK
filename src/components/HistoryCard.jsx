@@ -1,4 +1,5 @@
 import { THEMES } from '../data/themes.js';
+import { getItemEmoji } from '../data/item-emojis.js';
 import { formatShortDate, formatNumber, sumTokens } from '../lib/format.js';
 import { Stat } from './ui.jsx';
 
@@ -9,6 +10,7 @@ export function HistoryCard({ item }) {
   const tokens = sumTokens(item.usage);
   const date = formatShortDate(item.completedAt);
   const theme = THEMES[item.theme];
+  const emoji = getItemEmoji(item.animal_en, theme?.emoji || '🎨');
 
   return (
     <div className="card fade-in-up">
@@ -28,10 +30,15 @@ export function HistoryCard({ item }) {
         </a>
       )}
       <div style={{ padding: '10px 12px 13px' }}>
-        <p className="result-title">{item.animal_pt}</p>
-        <p className="result-subtitle">
-          {item.animal_en} {theme ? `· ${theme.emoji}` : ''}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 'var(--text-xl)', lineHeight: 1 }} aria-hidden="true">
+            {emoji}
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p className="result-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.animal_pt}</p>
+            <p className="result-subtitle">{item.animal_en}</p>
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
           <Stat label="Tempo" value={`${item.elapsed}s`} />
           <Stat label="Tokens" value={formatNumber(tokens)} />
