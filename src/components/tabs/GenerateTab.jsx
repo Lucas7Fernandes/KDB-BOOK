@@ -12,6 +12,8 @@ export function GenerateTab({
   activeTheme,
   artStyle,
   setArtStyle,
+  turbo,
+  setTurbo,
   switchTheme,
   themeItems,
   selected,
@@ -204,11 +206,34 @@ export function GenerateTab({
             ? `⏳ Gerando... ${progressDone} / ${progressTotal}`
             : `🚀 Gerar ${selected.size} item${selected.size !== 1 ? 's' : ''} · $${selectionCost}`}
         </button>
-        {!running && selected.size === themeItems.length && (
-          <p style={{ marginTop: 8, fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
-            Livro completo · ~60s paralelo · $0.60
-          </p>
-        )}
+        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <label
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              fontSize: 'var(--text-sm)',
+              color: turbo ? 'var(--accent)' : 'var(--text-muted)',
+              fontWeight: turbo ? 700 : 500,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={turbo}
+              onChange={(e) => setTurbo(e.target.checked)}
+              style={{ width: 16, height: 16, accentColor: 'var(--accent)', cursor: 'pointer' }}
+            />
+            ⚡ Modo Turbo — tudo em paralelo (requer saldo ≥ $5 no Replicate)
+          </label>
+          {!running && selected.size > 0 && (
+            <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
+              {turbo
+                ? `Tempo estimado: ~60s (paralelo total)`
+                : `Fila segura (6/min): ~${Math.ceil(((selected.size - 1) * 11 + 60) / 60)} min para ${selected.size} item${selected.size !== 1 ? 's' : ''}`}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Results */}

@@ -32,4 +32,5 @@ export const STORAGE_KEYS = {
   KDP_META: 'kdp_meta',
   ACTIVE_THEME: 'kdp_active_theme',
   ART_STYLE: 'kdp_art_style',
+  TURBO: 'kdp_turbo',
 };

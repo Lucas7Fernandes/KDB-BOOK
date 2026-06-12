@@ -65,6 +65,10 @@ export default function App() {
   const [kdpMeta, setKdpMeta] = usePersistedJSON(STORAGE_KEYS.KDP_META, DEFAULT_KDP_META);
   const [activeTheme, setActiveTheme] = usePersistedState(STORAGE_KEYS.ACTIVE_THEME, 'selva');
   const [artStyle, setArtStyle] = usePersistedState(STORAGE_KEYS.ART_STYLE, 'classic');
+  const [turbo, setTurbo] = usePersistedState(
+    STORAGE_KEYS.TURBO, false,
+    { serialize: String, deserialize: (s) => s === 'true' }
+  );
 
   // ── Estado de UI (não persistido) ──
   const [tab, setTab] = useState('gerar');
@@ -139,11 +143,23 @@ export default function App() {
       }));
 
       try {
-        const data = await generateImage(
-          item,
-          { webhookUrl, themeId: activeTheme, style: artStyle },
-          controller.signal
-        );
+        let data;
+        try {
+          data = await generateImage(
+            item,
+            { webhookUrl, themeId: activeTheme, style: artStyle },
+            controller.signal
+          );
+        } catch (firstErr) {
+          if (firstErr.name === 'AbortError') throw firstErr;
+          // Retry automático (rate limit 429 / falha transitória)
+          await new Promise((r) => setTimeout(r, 15_000));
+          data = await generateImage(
+            item,
+            { webhookUrl, themeId: activeTheme, style: artStyle },
+            controller.signal
+          );
+        }
 
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         const completedAt = new Date().toISOString();
@@ -210,8 +226,19 @@ export default function App() {
       return next;
     });
 
-    // Fire in parallel
-    const results = await Promise.all(itemsToGenerate.map((item) => generateOne(item)));
+    // Turbo: tudo em paralelo (requer saldo >= $5 no Replicate).
+    // Seguro: espaça os disparos em 11s (respeita o limite de 6/min).
+    const STAGGER_MS = turbo ? 0 : 11_000;
+    const results = await Promise.all(
+      itemsToGenerate.map((item, idx) =>
+        (async () => {
+          if (STAGGER_MS > 0 && idx > 0) {
+            await new Promise((r) => setTimeout(r, idx * STAGGER_MS));
+          }
+          return generateOne(item);
+        })()
+      )
+    );
 
     setRunning(false);
 
@@ -323,6 +350,8 @@ export default function App() {
             activeTheme={activeTheme}
             artStyle={artStyle}
             setArtStyle={setArtStyle}
+            turbo={turbo}
+            setTurbo={setTurbo}
             switchTheme={switchTheme}
             themeItems={themeItems}
             selected={selected}
