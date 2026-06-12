@@ -390,6 +390,7 @@ export default function App() {
           <HistoryTab
             history={history}
             kdpMeta={kdpMeta}
+            webhookUrl={webhookUrl}
             setHistory={setHistory}
             historyFilter={historyFilter}
             setHistoryFilter={setHistoryFilter}

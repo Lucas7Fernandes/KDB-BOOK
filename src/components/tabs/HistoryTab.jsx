@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { THEMES } from '../../data/themes.js';
 import { CATEGORY_FILTERS } from '../../data/categories.js';
 import { exportHistory } from '../../lib/export.js';
+import { syncDrive } from '../../lib/api.js';
 import { Button, EmptyState } from '../ui.jsx';
 import { HistoryCard } from '../HistoryCard.jsx';
 
@@ -11,6 +12,7 @@ import { HistoryCard } from '../HistoryCard.jsx';
 export function HistoryTab({
   history,
   kdpMeta,
+  webhookUrl,
   setHistory,
   historyFilter,
   setHistoryFilter,
@@ -35,6 +37,41 @@ export function HistoryTab({
     }
   };
 
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const files = await syncDrive(webhookUrl);
+      const known = new Set(history.map((h) => h.drive_file_id).filter(Boolean));
+      const missing = files.filter((f) => !known.has(f.drive_file_id));
+
+      if (missing.length === 0) {
+        showToast('Tudo sincronizado — nenhuma imagem nova no Drive');
+        return;
+      }
+
+      const newEntries = missing.map((f) => ({
+        id: `drive-${f.drive_file_id}`,
+        animal_en: f.animal_en,
+        animal_pt: f.animal_en.charAt(0).toUpperCase() + f.animal_en.slice(1),
+        image_url: '',
+        drive_file_id: f.drive_file_id,
+        usage: null,
+        theme: f.theme,
+        elapsed: '—',
+        completedAt: new Date().toISOString(),
+      }));
+
+      setHistory((prev) => [...newEntries, ...prev]);
+      showToast(`☁ ${missing.length} imagem(ns) recuperada(s) do Drive!`);
+    } catch (err) {
+      showToast(`Erro no sync: ${err.message}`, 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const deleteItem = (id) => {
     setHistory((prev) => prev.filter((h) => h.id !== id));
     showToast('Imagem removida do histórico');
@@ -53,6 +90,11 @@ export function HistoryTab({
         <span className="section-label">
           Histórico · {history.length} imagens totais · {filtered.length} filtradas
         </span>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <Button variant="accent" onClick={handleSync} disabled={syncing}>
+            {syncing ? '⏳ Sincronizando...' : '☁ Sincronizar do Drive'}
+          </Button>
+        </div>
         {history.length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <Button variant="info" onClick={() => doExport('csv')}>📄 CSV</Button>

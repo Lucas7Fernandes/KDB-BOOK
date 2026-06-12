@@ -67,3 +67,33 @@ export async function generateCover(theme, themeId, webhookUrl, signal) {
     signal
   );
 }
+
+/**
+ * Lista os arquivos da pasta do Google Drive via rota "sync" do Make.
+ * Retorna [{ drive_file_id, name, theme, animal_en }].
+ * Custo: ~3 operações Make por chamada (sem custo Replicate).
+ */
+export async function syncDrive(webhookUrl, signal) {
+  const data = await postWebhook(webhookUrl, { action: 'sync' }, signal);
+  const ids = (data.ids || '').split(',').filter(Boolean);
+  const names = (data.names || '').split(',').filter(Boolean);
+
+  return ids.map((id, i) => {
+    const name = names[i] || '';
+    const base = name.replace(/\.jpe?g$/i, '');
+    let theme = null;
+    let animalEn = base;
+
+    if (base.includes('__')) {
+      // Formato novo: tema__animal.jpg
+      const [t, ...rest] = base.split('__');
+      theme = t || null;
+      animalEn = rest.join('__') || base;
+    } else {
+      // Formato legado: animal-coloring-book.jpg
+      animalEn = base.replace(/-coloring-book$/i, '');
+    }
+
+    return { drive_file_id: id, name, theme, animal_en: animalEn };
+  });
+}
