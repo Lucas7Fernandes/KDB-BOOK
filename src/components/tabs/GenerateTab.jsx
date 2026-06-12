@@ -199,13 +199,20 @@ export function GenerateTab({
       <div style={{ textAlign: 'center', margin: '0 0 var(--space-8)' }}>
         <button
           className="btn btn-primary"
-          disabled={selected.size === 0 || running}
+          disabled={selected.size === 0}
           onClick={handleGenerate}
         >
-          {running
-            ? `⏳ Gerando... ${progressDone} / ${progressTotal}`
-            : `🚀 Gerar ${selected.size} item${selected.size !== 1 ? 's' : ''} · $${selectionCost}`}
+          {selected.size > 0
+            ? `${running ? '➕ Adicionar à fila:' : '🚀 Gerar'} ${selected.size} item${selected.size !== 1 ? 's' : ''} · $${selectionCost}`
+            : running
+              ? `⏳ Gerando... ${progressDone} / ${progressTotal}`
+              : `🚀 Selecione itens para gerar`}
         </button>
+        {running && selected.size === 0 && (
+          <p style={{ margin: '8px 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
+            ⏳ Fila em andamento: {progressDone} / {progressTotal} — selecione mais itens para enfileirar
+          </p>
+        )}
         <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
           <label
             style={{

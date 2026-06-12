@@ -74,7 +74,6 @@ export default function App() {
   const [tab, setTab] = useState('gerar');
   const [generations, setGenerations] = useState({});
   const [selected, setSelected] = useState(new Set());
-  const [running, setRunning] = useState(false);
   const [customEn, setCustomEn] = useState('');
   const [customPt, setCustomPt] = useState('');
   const [catFilter, setCatFilter] = useState('all');
@@ -84,6 +83,8 @@ export default function App() {
 
   // Ref para abortar requisições em flight
   const abortControllersRef = useRef([]);
+  // Marcapasso global: garante espaçamento entre disparos (rate limit Replicate)
+  const paceRef = useRef(0);
 
   const { toast, showToast } = useToast();
 
@@ -91,6 +92,11 @@ export default function App() {
   const themeItems = theme.items;
 
   // ── Derived state ──
+  const running = useMemo(
+    () => Object.values(generations).some((g) => g.status === 'pending' || g.status === 'generating'),
+    [generations]
+  );
+
   const doneCount = useMemo(
     () => Object.values(generations).filter((g) => g.status === 'done').length,
     [generations]
@@ -126,9 +132,20 @@ export default function App() {
     };
   }, []);
 
+  /** Reserva um slot de disparo: 11s entre requests quando Turbo desligado. */
+  const waitForSlot = useCallback(async () => {
+    if (turbo) return;
+    const now = Date.now();
+    const slot = Math.max(now, paceRef.current);
+    paceRef.current = slot + 11_000;
+    const wait = slot - now;
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  }, [turbo]);
+
   // ── Single image generation ──
   const generateOne = useCallback(
     async (item) => {
+      await waitForSlot(); // respeita a fila global
       const startTime = Date.now();
       const controller = new AbortController();
       abortControllersRef.current.push(controller);
@@ -203,19 +220,23 @@ export default function App() {
         return 'error';
       }
     },
-    [webhookUrl, activeTheme, artStyle, setHistory]
+    [webhookUrl, activeTheme, artStyle, setHistory, waitForSlot]
   );
 
   // ── Generation handlers ──
   const handleGenerate = async () => {
-    if (running) return;
-
     requestNotifyPermission(); // gesto do usuário: momento certo de pedir
-    setRunning(true);
 
     const itemsToGenerate = Array.from(selected)
       .map((en) => themeItems.find((i) => i.en === en))
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter((item) => {
+        const g = generations[item.en];
+        return !(g && (g.status === 'pending' || g.status === 'generating'));
+      });
+
+    if (itemsToGenerate.length === 0) return;
+    setSelected(new Set()); // libera a seleção para enfileirar mais
 
     // Mark all as pending immediately
     setGenerations((prev) => {
@@ -226,21 +247,8 @@ export default function App() {
       return next;
     });
 
-    // Turbo: tudo em paralelo (requer saldo >= $5 no Replicate).
-    // Seguro: espaça os disparos em 11s (respeita o limite de 6/min).
-    const STAGGER_MS = turbo ? 0 : 11_000;
-    const results = await Promise.all(
-      itemsToGenerate.map((item, idx) =>
-        (async () => {
-          if (STAGGER_MS > 0 && idx > 0) {
-            await new Promise((r) => setTimeout(r, idx * STAGGER_MS));
-          }
-          return generateOne(item);
-        })()
-      )
-    );
-
-    setRunning(false);
+    // O espaçamento (modo seguro) é aplicado pelo waitForSlot dentro de generateOne
+    const results = await Promise.all(itemsToGenerate.map((item) => generateOne(item)));
 
     const ok = results.filter((r) => r === 'done').length;
     const failed = results.filter((r) => r === 'error').length;
