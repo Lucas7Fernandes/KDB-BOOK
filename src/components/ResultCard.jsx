@@ -10,7 +10,8 @@ import { StatusBadge, Stat, Spinner, ElapsedTimer } from './ui.jsx';
 export function ResultCard({ itemKey, generation, themeEmoji, onRegenerate }) {
   const tokens = generation.usage ? sumTokens(generation.usage) : null;
   const cost = generation.usage?.replicate?.cost_usd ?? CONFIG.COST_PER_IMAGE;
-  const emoji = getItemEmoji(itemKey, themeEmoji);
+  const baseEn = itemKey.split('::')[0];
+  const emoji = getItemEmoji(baseEn, themeEmoji);
 
   const cardClass = `card fade-in-up ${
     generation.status === 'done' ? 'card-success' :
@@ -25,7 +26,7 @@ export function ResultCard({ itemKey, generation, themeEmoji, onRegenerate }) {
         </span>
         <div style={{ flex: 1 }}>
           <p className="result-title">{generation.animal_pt || itemKey}</p>
-          <p className="result-subtitle">{itemKey}</p>
+          <p className="result-subtitle">{itemKey.replace('::', ' · ')}</p>
         </div>
         <StatusBadge status={generation.status} />
       </div>

@@ -144,7 +144,9 @@ export default function App() {
 
   // ── Single image generation ──
   const generateOne = useCallback(
-    async (item) => {
+    async (item, styleOverride) => {
+      const style = styleOverride || artStyle;
+      const key = `${item.en}::${style}`;
       await waitForSlot(); // respeita a fila global
       const startTime = Date.now();
       const controller = new AbortController();
@@ -152,7 +154,7 @@ export default function App() {
 
       setGenerations((prev) => ({
         ...prev,
-        [item.en]: {
+        [key]: {
           status: 'generating',
           startTime,
           animal_pt: item.pt,
@@ -164,7 +166,7 @@ export default function App() {
         try {
           data = await generateImage(
             item,
-            { webhookUrl, themeId: activeTheme, style: artStyle },
+            { webhookUrl, themeId: activeTheme, style },
             controller.signal
           );
         } catch (firstErr) {
@@ -173,7 +175,7 @@ export default function App() {
           await new Promise((r) => setTimeout(r, 15_000));
           data = await generateImage(
             item,
-            { webhookUrl, themeId: activeTheme, style: artStyle },
+            { webhookUrl, themeId: activeTheme, style },
             controller.signal
           );
         }
@@ -183,7 +185,7 @@ export default function App() {
 
         setGenerations((prev) => ({
           ...prev,
-          [item.en]: {
+          [key]: {
             status: 'done',
             ...data,
             elapsed,
@@ -197,6 +199,7 @@ export default function App() {
             id: `${item.en}-${Date.now()}`,
             animal_en: item.en,
             animal_pt: item.pt,
+            style,
             image_url: data.image_url,
             drive_file_id: data.drive_file_id || null,
             usage: data.usage,
@@ -211,7 +214,7 @@ export default function App() {
         if (err.name === 'AbortError') return 'aborted';
         setGenerations((prev) => ({
           ...prev,
-          [item.en]: {
+          [key]: {
             status: 'error',
             error: err.message || 'Erro desconhecido',
             animal_pt: item.pt,
@@ -231,7 +234,7 @@ export default function App() {
       .map((en) => themeItems.find((i) => i.en === en))
       .filter(Boolean)
       .filter((item) => {
-        const g = generations[item.en];
+        const g = generations[`${item.en}::${artStyle}`];
         return !(g && (g.status === 'pending' || g.status === 'generating'));
       });
 
@@ -242,7 +245,7 @@ export default function App() {
     setGenerations((prev) => {
       const next = { ...prev };
       itemsToGenerate.forEach((item) => {
-        next[item.en] = { status: 'pending', animal_pt: item.pt };
+        next[`${item.en}::${artStyle}`] = { status: 'pending', animal_pt: item.pt };
       });
       return next;
     });
@@ -284,17 +287,18 @@ export default function App() {
    * ou reconstrói a partir do estado de generations (itens customizados).
    */
   const handleRegenerate = useCallback(
-    async (en) => {
+    async (key) => {
+      const [en, keyStyle] = key.split('::');
       const item =
         themeItems.find((i) => i.en === en) ||
-        (generations[en]?.animal_pt ? { en, pt: generations[en].animal_pt } : null);
+        (generations[key]?.animal_pt ? { en, pt: generations[key].animal_pt } : null);
       if (!item) {
         showToast('Item não encontrado para regenerar', 'error');
         return;
       }
       requestNotifyPermission();
       showToast(`🔄 Regenerando ${item.pt}...`);
-      const result = await generateOne(item);
+      const result = await generateOne(item, keyStyle);
       if (result === 'done') notify('✨ Imagem pronta!', `${item.pt} foi regenerada`);
     },
     [themeItems, generations, generateOne, showToast]

@@ -133,7 +133,7 @@ export function GenerateTab({
       {/* Item grid */}
       <div className="chip-grid">
         {themeItems.map((item) => {
-          const g = generations[item.en];
+          const g = generations[`${item.en}::${artStyle}`];
           const sel = selected.has(item.en);
           const busy = g?.status === 'generating' || g?.status === 'pending';
 
