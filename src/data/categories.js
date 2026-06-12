@@ -18,7 +18,7 @@ export const CATEGORIES = {
     name: 'Personagens',
     emoji: '🎭',
     color: '#BE185D',
-    themeIds: ['espaco', 'princesas'],
+    themeIds: ['espaco', 'princesas', 'personagens_originais'],
   },
   datas: {
     name: 'Datas Comemorativas',

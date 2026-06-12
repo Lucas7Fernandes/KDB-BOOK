@@ -476,6 +476,40 @@ export const THEMES = {
       item('potion', 'Poção'),
     ],
   },
+  personagens_originais: {
+    name: 'Personagens Originais',
+    emoji: '🎬',
+    color: '#7C3AED',
+    cat: 'personagens',
+    items: [
+      // Vibe "brinquedos aventureiros" (inspirado em toy story, sem copiar)
+      item('brave cowboy toy', 'Cowboy Corajoso'),
+      item('friendly space ranger toy', 'Ranger do Espaço'),
+      item('toy dinosaur', 'Dinossauro de Brinquedo'),
+      item('toy piggy bank', 'Cofre Porquinho'),
+      item('toy robot', 'Robô Brinquedo'),
+      // Vibe "família de porquinhos" (inspirado em peppa, sem copiar)
+      item('little piglet in rain boots', 'Porquinho na Chuva'),
+      item('daddy pig with glasses', 'Papai Porco'),
+      item('bunny in overalls', 'Coelhinho de Macacão'),
+      // Vibe "princesas e fadas originais"
+      item('tiny fairy with flower wings', 'Fadinha de Flores'),
+      item('little mermaid with starfish crown', 'Sereiazinha'),
+      // Vibe "aventuras no espaço" (original)
+      item('little alien with antenna', 'Alienzinho'),
+      item('baby astronaut floating', 'Astronauta Bebê'),
+      item('friendly planet with face', 'Planetinha Feliz'),
+      // Vibe "criaturas mágicas" (original)
+      item('tiny fire breathing dragon', 'Dragãozinho'),
+      item('baby unicorn foal', 'Unicórnio Bebê'),
+      item('little wizard with big hat', 'Bruxinho Aprendiz'),
+      item('cute monster with hearts', 'Monstro Fofo'),
+      // Vibe "super-heróis originais"
+      item('little superhero kid with cape', 'Supercriança'),
+      item('tiny robot hero', 'Robô Herói'),
+      item('baby ninja kitten', 'Gatinho Ninja'),
+    ],
+  },
 };
 
 /** Retorna lista de IDs de temas ordenada */

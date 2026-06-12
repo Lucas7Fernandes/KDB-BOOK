@@ -121,21 +121,62 @@ export function buildFluxPrompt(item, themeId, style = 'classic') {
 
   /* ── Estilo COZY: cena aconchegante estilo cozy/wholesome ── */
   if (style === 'cozy') {
+    // Variações de cena para evitar repetição — determinístico por item
+    const COZY_SCENES = [
+      {
+        activity: 'having a cozy picnic, sitting on a checkered blanket with a tiny basket',
+        props: 'small sandwiches, a teapot, butterflies, and little daisies around',
+      },
+      {
+        activity: 'reading a tiny book under a big mushroom, sitting on a pebble',
+        props: 'small snails, dewdrops, clovers, and tiny lanterns floating nearby',
+      },
+      {
+        activity: 'watering a little garden with a tiny watering can',
+        props: 'small sprouting plants, a sun peeking from corner, ladybugs, and a little fence',
+      },
+      {
+        activity: 'baking cookies, wearing a tiny apron, stirring a bowl',
+        props: 'floating stars, tiny rolling pin, small cookies, steam swirls above',
+      },
+      {
+        activity: 'wrapped in a cozy blanket, holding a hot cocoa mug with steam',
+        props: 'snowflakes, small mittens, a little candle, cozy stars around',
+      },
+      {
+        activity: 'playing with soap bubbles, arms stretched out joyfully',
+        props: 'floating bubbles each with tiny sparkle, small rainbow, little clouds',
+      },
+      {
+        activity: 'sitting on a cloud, fishing with a tiny rod down below',
+        props: 'small stars, moon crescent, twinkling dots, little birds nearby',
+      },
+      {
+        activity: 'planting a tiny seed in a small pot with a little shovel',
+        props: 'a smiling sun, small worm, tiny sprouting plant, seed packets',
+      },
+    ];
+
+    // Hash simples e determinística para variar por item.en
+    const hash = item.en.split('').reduce((a, ch) => a + ch.charCodeAt(0), 0);
+    const scene = COZY_SCENES[hash % COZY_SCENES.length];
+
     const activity = isAnimal
-      ? 'doing a wholesome cozy activity like having a picnic, holding a tiny flower, sipping from a teacup, or reading a little book'
-      : 'in a charming cozy wholesome setting';
+      ? scene.activity
+      : `in a charming cozy wholesome setting, ${scene.activity}`;
+
     return [
       `A black and white children's coloring book illustration of a cute chibi ${item.en}, cozy wholesome style.`,
       `Scene: the character is ${activity},`,
-      `surrounded by small adorable decorative objects: tiny hearts, little stars, small flowers, sparkles, cookies, or mushrooms.`,
+      `with ${scene.props}.`,
       `Character design: rounded squishy soft proportions, simple dot eyes, tiny happy smile, plump cheeks, very huggable look.`,
       `Drawing rules (CRITICAL):`,
       `- THICK clean uniform black outlines throughout`,
-      `- PURE WHITE background with only the small cute objects floating around`,
+      `- PURE WHITE background with only the small cute scene objects floating around`,
       `- NO shading, NO gray, NO color fills, NO gradients`,
       `- Simple rounded lines, cozy warm wholesome atmosphere`,
       `- All shapes CLOSED for easy coloring`,
-      `Composition: character fills 65 percent of the frame, cute objects scattered around the edges.`,
+      `Composition: character fills 65 percent of the frame, scene objects scattered gently around.`,
       `Format: portrait orientation, ready for 8.5 x 11 inch KDP coloring book printing.`,
       `IMPORTANT: just line art for coloring, no color anywhere.`,
     ].join(' ');

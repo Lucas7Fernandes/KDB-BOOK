@@ -39,6 +39,28 @@ export const ITEM_EMOJIS = {
   axolotl: '🦎', 'mini pig': '🐷', parakeet: '🦜', cockatoo: '🦜',
   iguana: '🦎', 'bearded dragon': '🦎',
 
+
+  // ─── Personagens Originais ───
+  'brave cowboy toy': '🤠',
+  'friendly space ranger toy': '🚀',
+  'toy dinosaur': '🦕',
+  'toy piggy bank': '🐷',
+  'toy robot': '🤖',
+  'little piglet in rain boots': '🐷',
+  'daddy pig with glasses': '🐷',
+  'bunny in overalls': '🐰',
+  'tiny fairy with flower wings': '🧚',
+  'little mermaid with starfish crown': '🧜',
+  'little alien with antenna': '👽',
+  'baby astronaut floating': '👨‍🚀',
+  'friendly planet with face': '🪐',
+  'tiny fire breathing dragon': '🐉',
+  'baby unicorn foal': '🦄',
+  'little wizard with big hat': '🧙',
+  'cute monster with hearts': '👾',
+  'little superhero kid with cape': '🦸',
+  'tiny robot hero': '🤖',
+  'baby ninja kitten': '🐱',
   // ─── Dinossauros ───
   'T-Rex': '🦖', triceratops: '🦕', brachiosaurus: '🦕', stegosaurus: '🦕',
   velociraptor: '🦖', pterodactyl: '🦅', ankylosaurus: '🦕', diplodocus: '🦕',
