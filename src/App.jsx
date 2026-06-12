@@ -20,6 +20,7 @@ import { FinanceTab } from './components/tabs/FinanceTab.jsx';
 import { KdpTab } from './components/tabs/KdpTab.jsx';
 import { SeoTab } from './components/tabs/SeoTab.jsx';
 import { CanvaTab } from './components/tabs/CanvaTab.jsx';
+import { PhotoTab } from './components/tabs/PhotoTab.jsx';
 import { HistoryTab } from './components/tabs/HistoryTab.jsx';
 import { SettingsTab } from './components/tabs/SettingsTab.jsx';
 
@@ -421,6 +422,10 @@ export default function App() {
 
         {tab === 'seo' && (
           <SeoTab kdpMeta={kdpMeta} activeTheme={activeTheme} showToast={showToast} />
+        )}
+
+        {tab === 'foto' && (
+          <PhotoTab artStyle={artStyle} setArtStyle={setArtStyle} activeTheme={activeTheme} />
         )}
 
         {tab === 'canva' && (

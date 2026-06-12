@@ -18,7 +18,7 @@
  * Habitat / cenário de fundo por tema.
  * Cada tema tem um cenário simples e contextual para o background.
  */
-const THEME_HABITATS = {
+export const THEME_HABITATS = {
   selva:       'lush jungle setting with simple palm leaves, hanging vines, small flowers, and a friendly sun in the corner',
   fazenda:     'farm scene with simple barn outline in background, grass tufts, wooden fence, and small fluffy clouds',
   oceano:      'underwater scene with simple bubbles, gentle wave lines, seaweed, and small coral pieces (no sun, no floor)',
