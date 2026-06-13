@@ -14,320 +14,228 @@ import { Header } from './components/Header.jsx';
 import { Dashboard } from './components/Dashboard.jsx';
 import { ProgressBar, Toast } from './components/ui.jsx';
 
-import { GenerateTab } from './components/tabs/GenerateTab.jsx';
-import { CatalogTab } from './components/tabs/CatalogTab.jsx';
-import { FinanceTab } from './components/tabs/FinanceTab.jsx';
-import { KdpTab } from './components/tabs/KdpTab.jsx';
-import { SeoTab } from './components/tabs/SeoTab.jsx';
-import { CanvaTab } from './components/tabs/CanvaTab.jsx';
-import { PhotoTab } from './components/tabs/PhotoTab.jsx';
-import { HistoryTab } from './components/tabs/HistoryTab.jsx';
-import { SettingsTab } from './components/tabs/SettingsTab.jsx';
+import { GenerateTab }  from './components/tabs/GenerateTab.jsx';
+import { CatalogTab }   from './components/tabs/CatalogTab.jsx';
+import { FinanceTab }   from './components/tabs/FinanceTab.jsx';
+import { KdpTab }       from './components/tabs/KdpTab.jsx';
+import { SeoTab }       from './components/tabs/SeoTab.jsx';
+import { CanvaTab }     from './components/tabs/CanvaTab.jsx';
+import { PhotoTab }     from './components/tabs/PhotoTab.jsx';
+import { HistoryTab }   from './components/tabs/HistoryTab.jsx';
+import { SettingsTab }  from './components/tabs/SettingsTab.jsx';
 
-/**
- * Componente raiz da aplicação.
- *
- * Estado:
- *   - webhookUrl, useProxy: configuração da API
- *   - balanceInput, initBalance: saldo Replicate
- *   - history: lista de imagens geradas
- *   - bookStatus, kdpCheck, kdpMeta: workflow KDP
- *   - activeTheme: tema selecionado
- *   - generations: cache de gerações em andamento (não persistido)
- *   - selected: seleção atual de itens para gerar
- *   - tab: aba ativa do menu
- */
 export default function App() {
-  // ── Configuração (persistida) ──
-  const [webhookUrl, setWebhookUrl] = usePersistedState(STORAGE_KEYS.WEBHOOK, CONFIG.WEBHOOK_URL);
-  const [useProxy, setUseProxy] = usePersistedState(
-    STORAGE_KEYS.USE_PROXY,
-    CONFIG.USE_CORS_PROXY,
-    { serialize: String, deserialize: (s) => s !== 'false' }
-  );
+  // ── Configuração ──
+  const [webhookUrl,      setWebhookUrl]      = usePersistedState(STORAGE_KEYS.WEBHOOK,       CONFIG.WEBHOOK_URL);
+  const [photoWebhookUrl, setPhotoWebhookUrl] = usePersistedState(STORAGE_KEYS.PHOTO_WEBHOOK, CONFIG.PHOTO_WEBHOOK_URL);
 
-  // ── Estado financeiro ──
-  const [balanceInput, setBalanceInput] = usePersistedState(
-    STORAGE_KEYS.BALANCE,
-    String(CONFIG.INITIAL_BALANCE)
-  );
-  const [initBalance, setInitBalance] = useState(CONFIG.INITIAL_BALANCE);
-
-  // Sincroniza initBalance com o input persistido
+  // ── Saldo Replicate ──
+  const [balanceInput, setBalanceInput] = usePersistedState(STORAGE_KEYS.BALANCE, String(CONFIG.INITIAL_BALANCE));
+  const [initBalance,  setInitBalance]  = useState(CONFIG.INITIAL_BALANCE);
   useEffect(() => {
     const v = parseFloat(balanceInput);
     if (!isNaN(v)) setInitBalance(v);
   }, [balanceInput]);
 
   // ── Workflow KDP ──
-  const [history, setHistory] = usePersistedJSON(STORAGE_KEYS.HISTORY, []);
-  const [bookStatus, setBookStatus] = usePersistedJSON(STORAGE_KEYS.BOOK_STATUS, {});
-  const [kdpCheck, setKdpCheck] = usePersistedJSON(STORAGE_KEYS.KDP_CHECK, {});
-  const [kdpMeta, setKdpMeta] = usePersistedJSON(STORAGE_KEYS.KDP_META, DEFAULT_KDP_META);
+  const [history,     setHistory]     = usePersistedJSON(STORAGE_KEYS.HISTORY,     []);
+  const [bookStatus,  setBookStatus]  = usePersistedJSON(STORAGE_KEYS.BOOK_STATUS, {});
+  const [kdpCheck,    setKdpCheck]    = usePersistedJSON(STORAGE_KEYS.KDP_CHECK,   {});
+  const [kdpMeta,     setKdpMeta]     = usePersistedJSON(STORAGE_KEYS.KDP_META,    DEFAULT_KDP_META);
   const [activeTheme, setActiveTheme] = usePersistedState(STORAGE_KEYS.ACTIVE_THEME, 'selva');
-  const [artStyle, setArtStyle] = usePersistedState(STORAGE_KEYS.ART_STYLE, 'classic');
-  const [turbo, setTurbo] = usePersistedState(
-    STORAGE_KEYS.TURBO, false,
-    { serialize: String, deserialize: (s) => s === 'true' }
-  );
+  const [artStyle,    setArtStyle]    = usePersistedState(STORAGE_KEYS.ART_STYLE,    'classic');
+  const [turbo,       setTurbo]       = usePersistedState(STORAGE_KEYS.TURBO, false,
+    { serialize: String, deserialize: (s) => s === 'true' });
 
-  // ── Estado de UI (não persistido) ──
-  const [tab, setTab] = useState('gerar');
-  const [generations, setGenerations] = useState({});
-  const [selected, setSelected] = useState(new Set());
-  const [customEn, setCustomEn] = useState('');
-  const [customPt, setCustomPt] = useState('');
-  const [catFilter, setCatFilter] = useState('all');
+  // ── UI ──
+  const [tab,           setTab]           = useState('gerar');
+  const [generations,   setGenerations]   = useState({});
+  const [selected,      setSelected]      = useState(new Set());
+  const [customEn,      setCustomEn]      = useState('');
+  const [customPt,      setCustomPt]      = useState('');
+  const [catFilter,     setCatFilter]     = useState('all');
   const [historyFilter, setHistoryFilter] = useState('all');
-  const [finPrice, setFinPrice] = useState(7.99);
-  const [finSales, setFinSales] = useState(30);
+  const [finPrice,      setFinPrice]      = useState(7.99);
+  const [finSales,      setFinSales]      = useState(30);
 
-  // Ref para abortar requisições em flight
   const abortControllersRef = useRef([]);
-  // Marcapasso global: garante espaçamento entre disparos (rate limit Replicate)
-  const paceRef = useRef(0);
-
+  const paceRef             = useRef(0);
   const { toast, showToast } = useToast();
 
-  const theme = THEMES[activeTheme] || THEMES.selva;
+  const theme      = THEMES[activeTheme] || THEMES.selva;
   const themeItems = theme.items;
 
-  // ── Derived state ──
+  // ── Derived ──
   const running = useMemo(
-    () => Object.values(generations).some((g) => g.status === 'pending' || g.status === 'generating'),
+    () => Object.values(generations).some(g => g.status === 'pending' || g.status === 'generating'),
     [generations]
   );
+  const doneCount  = useMemo(() => Object.values(generations).filter(g => g.status === 'done').length,  [generations]);
+  const errorCount = useMemo(() => Object.values(generations).filter(g => g.status === 'error').length, [generations]);
 
-  const doneCount = useMemo(
-    () => Object.values(generations).filter((g) => g.status === 'done').length,
-    [generations]
-  );
-
-  const errorCount = useMemo(
-    () => Object.values(generations).filter((g) => g.status === 'error').length,
-    [generations]
-  );
-
-  const sessionCost = doneCount * CONFIG.COST_PER_IMAGE;
-
+  const sessionCost  = history.filter(h => !h.isPhoto).reduce((s, h) => s + CONFIG.COST_PER_IMAGE, 0)
+                     + history.filter(h => h.isPhoto).reduce((s, h) => s + CONFIG.COST_PER_PHOTO, 0);
   const sessionTokens = useMemo(
-    () =>
-      Object.values(generations)
-        .filter((g) => g.status === 'done')
-        .reduce((sum, g) => sum + sumTokens(g.usage), 0),
+    () => Object.values(generations).filter(g => g.status === 'done').reduce((s, g) => s + sumTokens(g.usage), 0),
     [generations]
   );
-
-  const remaining = initBalance - sessionCost;
-  const royalty = calculateRoyalty(finPrice, CONFIG.PRINT_COST);
-  const kdpDone = Object.values(kdpCheck).filter(Boolean).length;
-  const publishedCount = Object.values(bookStatus).filter((s) => s === 'publicado').length;
+  const remaining       = initBalance - sessionCost;
+  const royalty         = calculateRoyalty(finPrice, CONFIG.PRINT_COST);
+  const kdpDone         = Object.values(kdpCheck).filter(Boolean).length;
+  const publishedCount  = Object.values(bookStatus).filter(s => s === 'publicado').length;
   const generationTotal = Object.keys(generations).length;
   const progressPercent = generationTotal > 0 ? Math.round((doneCount / generationTotal) * 100) : 0;
 
-  // ── Service worker p/ notificações + limpeza de aborts ──
+  // ── Init ──
   useEffect(() => {
     initNotifications();
-    return () => {
-      abortControllersRef.current.forEach((c) => c.abort());
-    };
+    return () => abortControllersRef.current.forEach(c => c.abort());
   }, []);
 
-  /** Reserva um slot de disparo: 11s entre requests quando Turbo desligado. */
+  /** Pacer: 11s entre disparos no modo seguro */
   const waitForSlot = useCallback(async () => {
     if (turbo) return;
-    const now = Date.now();
+    const now  = Date.now();
     const slot = Math.max(now, paceRef.current);
     paceRef.current = slot + 11_000;
     const wait = slot - now;
-    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    if (wait > 0) await new Promise(r => setTimeout(r, wait));
   }, [turbo]);
 
-  // ── Single image generation ──
-  const generateOne = useCallback(
-    async (item, styleOverride) => {
-      const style = styleOverride || artStyle;
-      const key = `${item.en}::${style}`;
-      await waitForSlot(); // respeita a fila global
-      const startTime = Date.now();
-      const controller = new AbortController();
-      abortControllersRef.current.push(controller);
+  // ── Gerar imagem única ──
+  const generateOne = useCallback(async (item, styleOverride) => {
+    const style = styleOverride || artStyle;
+    const key   = `${item.en}::${style}`;
+    await waitForSlot();
 
-      setGenerations((prev) => ({
-        ...prev,
-        [key]: {
-          status: 'generating',
-          startTime,
-          animal_pt: item.pt,
-        },
-      }));
+    const startTime  = Date.now();
+    const controller = new AbortController();
+    abortControllersRef.current.push(controller);
 
+    setGenerations(prev => ({ ...prev, [key]: { status: 'generating', startTime, animal_pt: item.pt } }));
+
+    try {
+      let data;
       try {
-        let data;
-        try {
-          data = await generateImage(
-            item,
-            { webhookUrl, themeId: activeTheme, style },
-            controller.signal
-          );
-        } catch (firstErr) {
-          if (firstErr.name === 'AbortError') throw firstErr;
-          // Retry automático (rate limit 429 / falha transitória)
-          await new Promise((r) => setTimeout(r, 15_000));
-          data = await generateImage(
-            item,
-            { webhookUrl, themeId: activeTheme, style },
-            controller.signal
-          );
-        }
-
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-        const completedAt = new Date().toISOString();
-
-        setGenerations((prev) => ({
-          ...prev,
-          [key]: {
-            status: 'done',
-            ...data,
-            elapsed,
-            completedAt,
-          },
-        }));
-
-        // Add to persistent history
-        setHistory((prev) => [
-          {
-            id: `${item.en}-${Date.now()}`,
-            animal_en: item.en,
-            animal_pt: item.pt,
-            style,
-            image_url: data.image_url,
-            drive_file_id: data.drive_file_id || null,
-            usage: data.usage,
-            theme: activeTheme,
-            elapsed,
-            completedAt,
-          },
-          ...prev,
-        ].slice(0, CONFIG.HISTORY_LIMIT));
-        return 'done';
-      } catch (err) {
-        if (err.name === 'AbortError') return 'aborted';
-        setGenerations((prev) => ({
-          ...prev,
-          [key]: {
-            status: 'error',
-            error: err.message || 'Erro desconhecido',
-            animal_pt: item.pt,
-          },
-        }));
-        return 'error';
+        data = await generateImage(item, { webhookUrl, themeId: activeTheme, style }, controller.signal);
+      } catch (firstErr) {
+        if (firstErr.name === 'AbortError') throw firstErr;
+        await new Promise(r => setTimeout(r, 15_000)); // auto-retry após 15s
+        data = await generateImage(item, { webhookUrl, themeId: activeTheme, style }, controller.signal);
       }
-    },
-    [webhookUrl, activeTheme, artStyle, setHistory, waitForSlot]
-  );
 
-  // ── Generation handlers ──
+      const elapsed     = ((Date.now() - startTime) / 1000).toFixed(1);
+      const completedAt = new Date().toISOString();
+
+      setGenerations(prev => ({ ...prev, [key]: { status: 'done', ...data, elapsed, completedAt } }));
+      setHistory(prev => [{
+        id:           `${item.en}-${Date.now()}`,
+        animal_en:    item.en,
+        animal_pt:    item.pt,
+        style,
+        image_url:    data.image_url,
+        drive_file_id: data.drive_file_id || null,
+        usage:        data.usage,
+        theme:        activeTheme,
+        elapsed,
+        completedAt,
+      }, ...prev].slice(0, CONFIG.HISTORY_LIMIT));
+      return 'done';
+    } catch (err) {
+      if (err.name === 'AbortError') return 'aborted';
+      setGenerations(prev => ({ ...prev, [key]: { status: 'error', error: err.message || 'Erro desconhecido', animal_pt: item.pt } }));
+      return 'error';
+    }
+  }, [webhookUrl, activeTheme, artStyle, setHistory, waitForSlot]);
+
+  // ── Handlers de geração ──
   const handleGenerate = async () => {
-    requestNotifyPermission(); // gesto do usuário: momento certo de pedir
-
+    requestNotifyPermission();
     const itemsToGenerate = Array.from(selected)
-      .map((en) => themeItems.find((i) => i.en === en))
+      .map(en => themeItems.find(i => i.en === en))
       .filter(Boolean)
-      .filter((item) => {
+      .filter(item => {
         const g = generations[`${item.en}::${artStyle}`];
         return !(g && (g.status === 'pending' || g.status === 'generating'));
       });
-
     if (itemsToGenerate.length === 0) return;
-    setSelected(new Set()); // libera a seleção para enfileirar mais
 
-    // Mark all as pending immediately
-    setGenerations((prev) => {
+    setSelected(new Set());
+    setGenerations(prev => {
       const next = { ...prev };
-      itemsToGenerate.forEach((item) => {
-        next[`${item.en}::${artStyle}`] = { status: 'pending', animal_pt: item.pt };
-      });
+      itemsToGenerate.forEach(item => { next[`${item.en}::${artStyle}`] = { status: 'pending', animal_pt: item.pt }; });
       return next;
     });
 
-    // O espaçamento (modo seguro) é aplicado pelo waitForSlot dentro de generateOne
-    const results = await Promise.all(itemsToGenerate.map((item) => generateOne(item)));
-
-    const ok = results.filter((r) => r === 'done').length;
-    const failed = results.filter((r) => r === 'error').length;
+    const results = await Promise.all(itemsToGenerate.map(item => generateOne(item)));
+    const ok     = results.filter(r => r === 'done').length;
+    const failed = results.filter(r => r === 'error').length;
     notify(
       failed === 0 ? '🎨 Geração concluída!' : '🎨 Geração concluída (com erros)',
-      `${ok} de ${itemsToGenerate.length} imagens prontas${failed ? ` · ${failed} com erro` : ''} — ${theme.name}`
+      `${ok} de ${itemsToGenerate.length} prontas${failed ? ` · ${failed} com erro` : ''} — ${theme.name}`
     );
-
-    // Mark theme as "gerado" if all items completed successfully
-    if (itemsToGenerate.length === themeItems.length && itemsToGenerate.length > 0) {
-      setBookStatus((prev) => ({ ...prev, [activeTheme]: 'gerado' }));
+    if (itemsToGenerate.length === themeItems.length) {
+      setBookStatus(prev => ({ ...prev, [activeTheme]: 'gerado' }));
       showToast(`✓ ${theme.name} completo!`);
     }
   };
 
   const handleAddCustom = async () => {
-    const en = customEn.trim();
-    const pt = customPt.trim();
-    if (!en || !pt) {
-      showToast('Preencha ambos os campos', 'error');
-      return;
-    }
-    setCustomEn('');
-    setCustomPt('');
+    const en = customEn.trim(), pt = customPt.trim();
+    if (!en || !pt) { showToast('Preencha ambos os campos', 'error'); return; }
+    setCustomEn(''); setCustomPt('');
     requestNotifyPermission();
     showToast(`Gerando ${pt}...`);
     const result = await generateOne({ en, pt });
     if (result === 'done') notify('✨ Imagem pronta!', `${pt} foi gerada com sucesso`);
   };
 
-  /**
-   * Regenera um item individual ($0.03). Busca o item no tema ativo
-   * ou reconstrói a partir do estado de generations (itens customizados).
-   */
-  const handleRegenerate = useCallback(
-    async (key) => {
-      const [en, keyStyle] = key.split('::');
-      const item =
-        themeItems.find((i) => i.en === en) ||
-        (generations[key]?.animal_pt ? { en, pt: generations[key].animal_pt } : null);
-      if (!item) {
-        showToast('Item não encontrado para regenerar', 'error');
-        return;
-      }
-      requestNotifyPermission();
-      showToast(`🔄 Regenerando ${item.pt}...`);
-      const result = await generateOne(item, keyStyle);
-      if (result === 'done') notify('✨ Imagem pronta!', `${item.pt} foi regenerada`);
-    },
-    [themeItems, generations, generateOne, showToast]
-  );
+  const handleRegenerate = useCallback(async (key) => {
+    const [en, keyStyle] = key.split('::');
+    const item = themeItems.find(i => i.en === en)
+      || (generations[key]?.animal_pt ? { en, pt: generations[key].animal_pt } : null);
+    if (!item) { showToast('Item não encontrado', 'error'); return; }
+    requestNotifyPermission();
+    showToast(`🔄 Regenerando ${item.pt}...`);
+    const result = await generateOne(item, keyStyle);
+    if (result === 'done') notify('✨ Pronto!', `${item.pt} regenerada`);
+  }, [themeItems, generations, generateOne, showToast]);
 
-  // ── Selection handlers ──
-  const toggleSelect = (en) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(en)) next.delete(en);
-      else next.add(en);
-      return next;
-    });
-  };
+  /** Adiciona foto gerada ao histórico */
+  const addPhotoToHistory = useCallback((photoData, subjectName) => {
+    setHistory(prev => [{
+      id:            `photo-${Date.now()}`,
+      animal_en:     photoData.animal || subjectName,
+      animal_pt:     subjectName,
+      style:         'photo',
+      image_url:     photoData.image_url,
+      drive_file_id: photoData.drive_file_id || null,
+      usage:         photoData.usage,
+      theme:         null,
+      elapsed:       '—',
+      completedAt:   new Date().toISOString(),
+      isPhoto:       true,
+    }, ...prev].slice(0, CONFIG.HISTORY_LIMIT));
+  }, [setHistory]);
 
-  const selectAll = () => setSelected(new Set(themeItems.map((i) => i.en)));
+  // ── Seleção ──
+  const toggleSelect = en => setSelected(prev => {
+    const next = new Set(prev);
+    next.has(en) ? next.delete(en) : next.add(en);
+    return next;
+  });
+  const selectAll  = () => setSelected(new Set(themeItems.map(i => i.en)));
   const selectNone = () => setSelected(new Set());
-  const selectTest = () => setSelected(new Set(themeItems.slice(0, 2).map((i) => i.en)));
+  const selectTest = () => setSelected(new Set(themeItems.slice(0, 2).map(i => i.en)));
 
-  const switchTheme = (id) => {
+  const switchTheme = id => {
     setActiveTheme(id);
     setSelected(new Set());
     setGenerations({});
-    setBookStatus((prev) => {
-      if (prev[id]) return prev;
-      return { ...prev, [id]: 'planejado' };
-    });
+    setBookStatus(prev => prev[id] ? prev : { ...prev, [id]: 'planejado' });
   };
+
+  const clearGenerations = () => { setGenerations({}); setSelected(new Set()); };
 
   // ── Render ──
   return (
@@ -340,19 +248,15 @@ export default function App() {
         setInitBalance={setInitBalance}
         sessionCost={sessionCost}
         remaining={remaining}
-        doneCount={doneCount}
-        sessionTokens={sessionTokens}
-        publishedCount={publishedCount}
-        totalThemes={Object.keys(THEMES).length}
+        doneCount={history.length}
         activeTheme={activeTheme}
-        kdpDone={kdpDone}
       />
 
       {running && (
         <div className="progress-strip">
           <ProgressBar
             percent={progressPercent}
-            label={`${doneCount}/${generationTotal} concluídas · ${errorCount} erros`}
+            label={`${doneCount}/${generationTotal} · ${errorCount > 0 ? `${errorCount} erros` : 'em andamento'}`}
           />
         </div>
       )}
@@ -361,60 +265,50 @@ export default function App() {
         {tab === 'gerar' && (
           <GenerateTab
             activeTheme={activeTheme}
-            artStyle={artStyle}
-            setArtStyle={setArtStyle}
-            turbo={turbo}
-            setTurbo={setTurbo}
+            artStyle={artStyle}    setArtStyle={setArtStyle}
+            turbo={turbo}          setTurbo={setTurbo}
             switchTheme={switchTheme}
             themeItems={themeItems}
             selected={selected}
             toggleSelect={toggleSelect}
-            selectAll={selectAll}
-            selectNone={selectNone}
-            selectTest={selectTest}
-            customEn={customEn}
-            customPt={customPt}
-            setCustomEn={setCustomEn}
-            setCustomPt={setCustomPt}
+            selectAll={selectAll}  selectNone={selectNone}  selectTest={selectTest}
+            customEn={customEn}    setCustomEn={setCustomEn}
+            customPt={customPt}    setCustomPt={setCustomPt}
             handleAddCustom={handleAddCustom}
             generations={generations}
             running={running}
             handleGenerate={handleGenerate}
             handleRegenerate={handleRegenerate}
+            clearGenerations={clearGenerations}
             progressDone={doneCount}
             progressTotal={generationTotal}
           />
         )}
 
-        {tab === 'catalogo' && (
-          <CatalogTab
-            history={history}
-            bookStatus={bookStatus}
-            setBookStatus={setBookStatus}
-            switchTheme={switchTheme}
-            setTab={setTab}
-            catFilter={catFilter}
-            setCatFilter={setCatFilter}
+        {tab === 'foto' && (
+          <PhotoTab
+            artStyle={artStyle}
+            activeTheme={activeTheme}
+            photoWebhookUrl={photoWebhookUrl}
+            addToHistory={addPhotoToHistory}
+            showToast={showToast}
           />
         )}
 
-        {tab === 'financas' && (
-          <FinanceTab
-            finPrice={finPrice}
-            setFinPrice={setFinPrice}
-            finSales={finSales}
-            setFinSales={setFinSales}
-            royalty={royalty}
-            publishedCount={publishedCount}
+        {tab === 'canva' && (
+          <CanvaTab
+            activeTheme={activeTheme}
+            history={history}
+            webhookUrl={webhookUrl}
+            kdpMeta={kdpMeta}
+            showToast={showToast}
           />
         )}
 
         {tab === 'kdp' && (
           <KdpTab
-            kdpCheck={kdpCheck}
-            setKdpCheck={setKdpCheck}
-            kdpMeta={kdpMeta}
-            setKdpMeta={setKdpMeta}
+            kdpCheck={kdpCheck}  setKdpCheck={setKdpCheck}
+            kdpMeta={kdpMeta}    setKdpMeta={setKdpMeta}
             activeTheme={activeTheme}
             showToast={showToast}
           />
@@ -424,12 +318,23 @@ export default function App() {
           <SeoTab kdpMeta={kdpMeta} activeTheme={activeTheme} showToast={showToast} />
         )}
 
-        {tab === 'foto' && (
-          <PhotoTab artStyle={artStyle} setArtStyle={setArtStyle} activeTheme={activeTheme} />
+        {tab === 'catalogo' && (
+          <CatalogTab
+            history={history}
+            bookStatus={bookStatus}  setBookStatus={setBookStatus}
+            switchTheme={switchTheme}
+            setTab={setTab}
+            catFilter={catFilter}    setCatFilter={setCatFilter}
+          />
         )}
 
-        {tab === 'canva' && (
-          <CanvaTab activeTheme={activeTheme} history={history} webhookUrl={webhookUrl} kdpMeta={kdpMeta} showToast={showToast} />
+        {tab === 'financas' && (
+          <FinanceTab
+            finPrice={finPrice}  setFinPrice={setFinPrice}
+            finSales={finSales}  setFinSales={setFinSales}
+            royalty={royalty}
+            publishedCount={publishedCount}
+          />
         )}
 
         {tab === 'history' && (
@@ -446,12 +351,9 @@ export default function App() {
 
         {tab === 'config' && (
           <SettingsTab
-            webhookUrl={webhookUrl}
-            setWebhookUrl={setWebhookUrl}
-            useProxy={useProxy}
-            setUseProxy={setUseProxy}
-            history={history}
-            setHistory={setHistory}
+            webhookUrl={webhookUrl}           setWebhookUrl={setWebhookUrl}
+            photoWebhookUrl={photoWebhookUrl} setPhotoWebhookUrl={setPhotoWebhookUrl}
+            history={history}                 setHistory={setHistory}
             setBookStatus={setBookStatus}
             setKdpCheck={setKdpCheck}
             setKdpMeta={setKdpMeta}

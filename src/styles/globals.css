@@ -248,7 +248,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4) var(--space-8);
+  padding: var(--space-3) var(--space-6);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
@@ -292,11 +292,15 @@ input:focus, textarea:focus, select:focus {
 .nav {
   display: flex;
   gap: 2px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
   background: var(--bg-surface-2);
   padding: 4px;
   border-radius: var(--radius-lg);
+  -webkit-overflow-scrolling: touch;
 }
+.nav::-webkit-scrollbar { display: none; }
 
 .nav-item {
   padding: var(--space-2) var(--space-4);

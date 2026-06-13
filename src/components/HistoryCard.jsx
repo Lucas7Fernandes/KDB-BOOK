@@ -11,7 +11,8 @@ export function HistoryCard({ item, onDelete }) {
   const tokens = sumTokens(item.usage);
   const date = formatShortDate(item.completedAt);
   const theme = THEMES[item.theme];
-  const emoji = getItemEmoji(item.animal_en, theme?.emoji || '🎨');
+  const isPhoto = item.isPhoto === true;
+  const emoji = isPhoto ? '📸' : getItemEmoji(item.animal_en, theme?.emoji || '🎨');
   const imgUrl = permanentImageUrl(item);
 
   return (
@@ -77,6 +78,9 @@ export function HistoryCard({ item, onDelete }) {
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-disabled)', margin: 0 }}>
             {date}
           </p>
+          {isPhoto && (
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--indigo)', fontWeight: 600 }}>📸 Foto</span>
+          )}
           {item.drive_file_id ? (
             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--success)', fontWeight: 600 }} title="Salva permanentemente no Google Drive">
               ☁ Drive

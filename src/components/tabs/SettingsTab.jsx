@@ -10,8 +10,8 @@ import { formatNumber } from '../../lib/format.js';
 export function SettingsTab({
   webhookUrl,
   setWebhookUrl,
-  useProxy,
-  setUseProxy,
+  photoWebhookUrl,
+  setPhotoWebhookUrl,
   history,
   setHistory,
   setBookStatus,
@@ -64,36 +64,27 @@ export function SettingsTab({
       </SectionGroup>
 
       <SectionGroup
-        label="Proxy CORS"
+        label="Webhook: Foto para Colorir"
+        hint="URL do cenário Make.com para converter fotos em desenhos. Criado automaticamente."
+      >
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            value={photoWebhookUrl}
+            onChange={(e) => setPhotoWebhookUrl(e.target.value)}
+            className="input input-mono"
+            style={{ flex: 1 }}
+          />
+        </div>
+      </SectionGroup>
+
+      <SectionGroup
+        label="Proxy CORS (descontinuado)"
         hint="Habilite se o Make.com bloquear chamadas diretas do browser. Usa corsproxy.io como intermediário."
       >
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            cursor: 'pointer',
-            padding: '10px 14px',
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-default)',
-            borderRadius: 'var(--radius-lg)',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={useProxy}
-            onChange={(e) => setUseProxy(e.target.checked)}
-            style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}
-          />
-          <div>
-            <p style={{ margin: 0, fontSize: 'var(--text-md)', color: 'var(--text-primary)' }}>
-              Usar proxy CORS para chamadas do webhook
-            </p>
-            <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--text-disabled)' }}>
-              {useProxy ? 'Ativo (corsproxy.io)' : 'Desativado (chamada direta)'}
-            </p>
-          </div>
-        </label>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', padding: '10px 14px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+          ✓ Proxy removido — o portal usa <code style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)' }}>application/x-www-form-urlencoded</code> que é uma "simple request" CORS, dispensando proxy.
+        </p>
       </SectionGroup>
 
       <SectionGroup label="Estatísticas globais">
