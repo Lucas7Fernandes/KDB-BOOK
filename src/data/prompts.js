@@ -209,7 +209,7 @@ export function buildFluxPrompt(item, themeId, style = 'classic') {
  * interior que é line art). Sem texto na imagem: o título é adicionado
  * no Canva para tipografia perfeita.
  */
-export function buildCoverPrompt(theme, themeId) {
+export function buildCoverPrompt(theme, themeId, bookTitle) {
   const stars = theme.items.slice(0, 4).map((i) => i.en).join(', ');
   const habitatHint = {
     selva: 'lush green jungle with tropical leaves and flowers',
@@ -228,18 +228,23 @@ export function buildCoverPrompt(theme, themeId) {
     natal: 'snowy christmas village with lights and decorations',
     pascoa: 'spring meadow full of colorful flowers',
     halloween: 'friendly halloween night with smiling moon and pumpkins',
+    personagens_originais: 'bright playful scene with colorful shapes and stars',
   }[themeId] || 'colorful cheerful scene';
 
+  const titleLine = bookTitle && bookTitle.trim()
+    ? `At the top third, the title text "${bookTitle.trim()}" written in big, fun, chunky hand-drawn CRAYON lettering, each letter a different bright color, slightly uneven and playful like a child wrote it, with bold black outline around each letter so it pops.`
+    : `Leave generous empty space at the TOP THIRD for a title to be added later.`;
+
   return [
-    `Children's coloring book COVER illustration, full vibrant colors.`,
+    `A children's coloring book COVER that looks like the pages were COLORED IN BY A CHILD with crayons.`,
     `Subject: adorable cute kawaii-style ${stars}, happy smiling faces, big sparkling eyes,`,
-    `grouped together in a joyful composition in a ${habitatHint}.`,
-    `Style: modern children's book illustration, soft rounded shapes, thick clean outlines,`,
-    `bright saturated cheerful color palette, smooth digital art, professional quality.`,
-    `Composition: characters fill the center, decorative elements around the edges,`,
-    `generous empty space at the TOP THIRD of the image for title text placement.`,
-    `Mood: joyful, warm, inviting, irresistibly cute, perfect for kids ages 3-8.`,
-    `NO text, NO words, NO letters anywhere in the image.`,
-    `Portrait orientation, book cover format.`,
+    `grouped together joyfully in a ${habitatHint}.`,
+    `CRITICAL coloring style: keep THICK BOLD BLACK OUTLINES clearly visible on everything (like a coloring book line drawing),`,
+    `then filled in with bright CRAYON coloring on top — visible crayon texture, slightly uneven strokes,`,
+    `a little coloring going outside the lines here and there, the charming imperfect look of a happy child coloring with a crayon box.`,
+    `Bright saturated primary crayon colors (red, blue, yellow, green, orange, purple).`,
+    titleLine,
+    `Mood: joyful, warm, inviting, irresistibly cute, eye-catching on a store shelf, perfect for kids ages 1-8.`,
+    `Portrait orientation, book cover format, white or soft pastel background border.`,
   ].join(' ');
 }

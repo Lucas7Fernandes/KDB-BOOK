@@ -16,6 +16,13 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
   const [error, setError] = useState(null);
 
   const theme = THEMES[activeTheme] || Object.values(THEMES)[0];
+
+  // Título sugerido a partir do kdpMeta ou do nome do tema
+  const [titleOnArt, setTitleOnArt] = useState(true);
+  const [coverTitle, setCoverTitle] = useState(
+    (kdpMeta && kdpMeta.title && kdpMeta.title.trim()) || `${theme.name} Coloring Book`
+  );
+
   const themeHistory = history.filter(
     (h) => h.theme === activeTheme && !h.animal_en.endsWith('-book-cover')
   );
@@ -28,7 +35,10 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
     setError(null);
     showToast('Gerando arte da capa... (~60s)');
     try {
-      const data = await generateCover(theme, activeTheme, webhookUrl);
+      const data = await generateCover(
+        theme, activeTheme, webhookUrl, undefined,
+        titleOnArt ? coverTitle : null
+      );
       setCover(data);
       showToast('✨ Capa gerada! Salva também no seu Google Drive');
     } catch (err) {
@@ -83,11 +93,40 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
             <h2 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-2xl)' }}>
               {theme.emoji} {theme.name}: Livro de Colorir
             </h2>
-            <p style={{ margin: '0 0 var(--space-5)', color: 'var(--text-tertiary)', fontSize: 'var(--text-md)', lineHeight: 1.6 }}>
-              Arte vibrante em estilo kawaii com os personagens do tema, espaço reservado
-              no topo para o título, salva automaticamente no seu Google Drive.
-              Custo: <b style={{ color: 'var(--accent)' }}>$0.03</b>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--text-tertiary)', fontSize: 'var(--text-md)', lineHeight: 1.6 }}>
+              Arte vibrante com os personagens do tema <b>coloridos em estilo giz de cera</b>,
+              como se uma criança tivesse pintado — bem chamativa para a prateleira.
+              Salva automaticamente no Google Drive. Custo: <b style={{ color: 'var(--accent)' }}>$0.03</b>
             </p>
+
+            {/* Controles de título */}
+            <div style={{ marginBottom: 'var(--space-4)' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 'var(--text-sm)', fontWeight: 700, color: titleOnArt ? 'var(--accent)' : 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>
+                <input
+                  type="checkbox"
+                  checked={titleOnArt}
+                  onChange={(e) => setTitleOnArt(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: 'var(--accent)', cursor: 'pointer' }}
+                />
+                🖍️ Escrever o título na arte (estilo giz de cera colorido)
+              </label>
+              {titleOnArt && (
+                <input
+                  type="text"
+                  value={coverTitle}
+                  onChange={(e) => setCoverTitle(e.target.value)}
+                  placeholder="Ex: Baby Safari Animals"
+                  className="input"
+                  style={{ width: '100%' }}
+                />
+              )}
+              <p className="hint" style={{ marginTop: 6 }}>
+                {titleOnArt
+                  ? 'O FLUX desenha o título em letras de giz de cera coloridas. Dica: títulos curtos saem melhor. Você pode refinar no Canva depois.'
+                  : 'A capa virá com espaço livre no topo para você adicionar o título no Canva.'}
+              </p>
+            </div>
+
             <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
               <button className="btn btn-primary" onClick={doGenerate} disabled={loading}>
                 {loading ? '⏳ Gerando capa...' : '✨ Gerar arte da capa'}
