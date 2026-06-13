@@ -23,6 +23,7 @@ import { CanvaTab }     from './components/tabs/CanvaTab.jsx';
 import { PhotoTab }     from './components/tabs/PhotoTab.jsx';
 import { HistoryTab }   from './components/tabs/HistoryTab.jsx';
 import { SettingsTab }  from './components/tabs/SettingsTab.jsx';
+import { GuideTab }     from './components/tabs/GuideTab.jsx';
 
 export default function App() {
   // ── Configuração ──
@@ -358,6 +359,8 @@ export default function App() {
             showToast={showToast}
           />
         )}
+
+        {tab === 'guia' && <GuideTab />}
 
         {tab === 'config' && (
           <SettingsTab

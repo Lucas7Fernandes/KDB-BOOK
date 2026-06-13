@@ -16,6 +16,7 @@ export function Header({ tab, setTab, historyCount, kdpDone }) {
       ['financas', '📊', 'Finanças'],
     ],
     [
+      ['guia',    '📚', 'Guia'],
       ['history', '📂', historyCount > 0 ? `Histórico (${historyCount})` : 'Histórico'],
       ['config',  '⚙',  'Config'],
     ],
