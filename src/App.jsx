@@ -97,7 +97,7 @@ export default function App() {
     if (turbo) return;
     const now  = Date.now();
     const slot = Math.max(now, paceRef.current);
-    paceRef.current = slot + 11_000;
+    paceRef.current = slot + 12_000;
     const wait = slot - now;
     if (wait > 0) await new Promise(r => setTimeout(r, wait));
   }, [turbo]);
@@ -116,12 +116,19 @@ export default function App() {
 
     try {
       let data;
-      try {
-        data = await generateImage(item, { webhookUrl, themeId: activeTheme, style }, controller.signal);
-      } catch (firstErr) {
-        if (firstErr.name === 'AbortError') throw firstErr;
-        await new Promise(r => setTimeout(r, 15_000)); // auto-retry após 15s
-        data = await generateImage(item, { webhookUrl, themeId: activeTheme, style }, controller.signal);
+      let attempt = 0;
+      while (true) {
+        try {
+          data = await generateImage(item, { webhookUrl, themeId: activeTheme, style }, controller.signal);
+          break;
+        } catch (err) {
+          if (err.name === 'AbortError') throw err;
+          attempt++;
+          if (attempt >= 3) throw err; // 1 tentativa + 2 retries
+          // Backoff: re-entra na fila global (waitForSlot) + espera extra crescente
+          await new Promise(r => setTimeout(r, attempt * 12_000));
+          await waitForSlot();
+        }
       }
 
       const elapsed     = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -143,7 +150,10 @@ export default function App() {
       return 'done';
     } catch (err) {
       if (err.name === 'AbortError') return 'aborted';
-      setGenerations(prev => ({ ...prev, [key]: { status: 'error', error: err.message || 'Erro desconhecido', animal_pt: item.pt } }));
+      const friendly = /429/.test(err.message || '')
+        ? 'Limite do Replicate (429). Saldo abaixo de $5 = só 6/min. Recarregue ou aguarde.'
+        : (err.message || 'Erro desconhecido');
+      setGenerations(prev => ({ ...prev, [key]: { status: 'error', error: friendly, animal_pt: item.pt } }));
       return 'error';
     }
   }, [webhookUrl, activeTheme, artStyle, setHistory, waitForSlot]);
