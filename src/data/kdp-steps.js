@@ -67,17 +67,33 @@ export const KDP_STEPS = [
 
 /** Metadados default para o formulário KDP */
 export const DEFAULT_KDP_META = {
-  title: '',
-  subtitle: '',
-  kw1: 'coloring book for kids',
-  kw2: 'animal coloring pages',
-  kw3: 'toddler activity book',
-  kw4: 'children coloring book',
-  kw5: '',
-  kw6: 'preschool activity book',
-  kw7: 'coloring book ages 4-8',
-  cat1: 'Juvenile Nonfiction > Activities > Coloring',
-  cat2: 'Children\'s Books > Activities > Activity Books',
-  desc: '',
-  price: '7.99',
+  title: 'Baby Safari Animals',
+  subtitle: 'My First Coloring Book for Toddlers Ages 1-4 | 40 Big & Easy Cute Animals to Color | Bold Simple Outlines for Little Hands',
+  kw1: 'toddler coloring book ages 1-3',
+  kw2: 'baby animals coloring book for kids',
+  kw3: 'first coloring book for toddlers',
+  kw4: 'bold and easy coloring book for kids',
+  kw5: 'simple coloring book for preschoolers',
+  kw6: 'cute animal coloring book ages 2-4',
+  kw7: 'safari jungle animals toddler activity book',
+  cat1: 'Books > Children\'s Books > Activities, Crafts & Games > Coloring Books',
+  cat2: 'Books > Children\'s Books > Animals',
+  desc: `<b>Give your little one hours of happy, screen-free fun!</b>
+
+<b>Baby Safari Animals</b> is the perfect first coloring book for toddlers and preschoolers who are just learning to hold a crayon. Each page features one adorable baby safari animal drawn with big, bold, easy-to-color outlines — designed especially for little hands ages 1 to 4.
+
+<b>Inside this book you'll find:</b>
+• 40 cute baby animals — lion, elephant, giraffe, zebra, hippo, monkey and many more
+• Extra-thick bold outlines that are easy for tiny hands to stay inside
+• One animal per page, printed single-sided so colors won't bleed through
+• Big, simple designs with no tiny details to frustrate young children
+• Large 8.5 x 8.5 inch pages — plenty of room to color
+
+<b>Why parents love it:</b>
+Coloring helps toddlers develop fine motor skills, hand-eye coordination, focus, and color recognition — all while having fun. A wonderful gift for birthdays, holidays, Easter baskets, or quiet-time activities at home.
+
+<b>Perfect for ages 1, 2, 3 and 4.</b>
+
+Scroll up and click <b>Add to Cart</b> to start the coloring adventure today!`,
+  price: '8.99',
 };
