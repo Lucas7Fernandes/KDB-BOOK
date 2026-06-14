@@ -93,12 +93,12 @@ export default function App() {
     return () => abortControllersRef.current.forEach(c => c.abort());
   }, []);
 
-  /** Pacer: 11s entre disparos no modo seguro */
+  /** Pacer: 12s entre disparos no modo seguro; 250ms no Turbo (evita travar o browser). */
   const waitForSlot = useCallback(async () => {
-    if (turbo) return;
     const now  = Date.now();
+    const gap  = turbo ? 250 : 12_000;
     const slot = Math.max(now, paceRef.current);
-    paceRef.current = slot + 12_000;
+    paceRef.current = slot + gap;
     const wait = slot - now;
     if (wait > 0) await new Promise(r => setTimeout(r, wait));
   }, [turbo]);
