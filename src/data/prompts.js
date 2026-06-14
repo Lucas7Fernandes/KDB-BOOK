@@ -103,19 +103,21 @@ export function buildFluxPrompt(item, themeId, style = 'classic') {
   /* ── Estilo BABY: bebê chibi, cabeça enorme, olhos gigantes ── */
   if (style === 'baby') {
     return [
-      `A black and white children's coloring book illustration of an adorable BABY ${item.en}, kawaii chibi style.`,
+      `Black and white line art coloring page for kids. Pure clean line drawing, NO fill, NO shading whatsoever.`,
+      `Subject: an adorable BABY ${item.en} in kawaii chibi style.`,
       `Character design (CRITICAL): oversized head taking up about HALF of the total body size,`,
-      `HUGE round sparkling eyes with big white highlight circles, tiny chubby rounded body,`,
-      `small sweet gentle smile, soft rounded simple shapes, irresistibly cute baby proportions.`,
-      `Drawing rules (CRITICAL):`,
-      `- EXTRA THICK bold black outlines, very chunky lines`,
-      `- PURE WHITE background, completely EMPTY background, no scenery`,
-      `- NO shading, NO gray tones, NO color, NO gradients`,
-      `- Very simple, minimal details, perfect for toddlers ages 2 to 5`,
-      `- All shapes CLOSED so kids can color inside`,
-      `Composition: the baby character fills 75 percent of the frame, centered, full body visible.`,
-      `Format: portrait orientation, ready for 8.5 x 11 inch KDP coloring book printing.`,
-      `IMPORTANT: just bold line art, no color, empty white background.`,
+      `HUGE round eyes drawn as simple outlines with small highlight circles (eyes must be OUTLINED only, NEVER filled black),`,
+      `tiny chubby rounded body, small sweet gentle smile, soft rounded simple shapes, irresistibly cute baby proportions.`,
+      `STRICT line-art rules (most important):`,
+      `- The ENTIRE drawing is made of clean BLACK OUTLINES on PURE WHITE only`,
+      `- Absolutely NO black fills, NO solid black areas, NO gray, NO grayscale, NO shading, NO shadows, NO gradients, NO hatching`,
+      `- Even dark animals (like a black cat) must be drawn as WHITE with only black outlines, so children can color them`,
+      `- EXTRA THICK uniform bold outlines, chunky confident lines of even weight`,
+      `- Completely EMPTY pure white background, no scenery, no floor, no shadow under the character`,
+      `- Very simple, minimal interior detail, suitable for toddlers ages 1 to 4`,
+      `- All shapes fully CLOSED so kids can color inside`,
+      `Composition: the baby character fills about 75 percent of the frame, centered, full body visible.`,
+      `Output: high-contrast crisp black-and-white coloring book line art, like a printable coloring page.`,
     ].join(' ');
   }
 
@@ -188,19 +190,20 @@ export function buildFluxPrompt(item, themeId, style = 'classic') {
     : `${article(item.en)} ${item.en}, child-friendly cartoon style, clear and recognizable`;
 
   return [
-    `A black and white children's coloring book illustration of ${subjectLine}.`,
+    `Black and white line art coloring page for kids. Pure clean line drawing, NO fill, NO shading whatsoever.`,
+    `Subject: ${subjectLine}.`,
     `Setting: ${habitat}.`,
     `Style: classic professional coloring book line art for kids ages 3 to 8 years old.`,
-    `Drawing rules (CRITICAL):`,
-    `- ONLY thick bold black outlines, 3 to 4 pixels wide`,
-    `- PURE WHITE background, completely empty fill, NO color anywhere`,
-    `- NO shading, NO crosshatching, NO gray tones, NO gradients`,
-    `- Simple clean curved lines, smooth and clear`,
-    `- All shapes are CLOSED so kids can color inside without gaps`,
+    `STRICT line-art rules (most important):`,
+    `- The ENTIRE drawing is made of clean BLACK OUTLINES on PURE WHITE only`,
+    `- Absolutely NO black fills, NO solid black areas, NO gray, NO grayscale, NO shading, NO shadows, NO gradients, NO crosshatching`,
+    `- Even dark subjects must be drawn as WHITE with only black outlines, so children can color them`,
+    `- Thick bold uniform black outlines, smooth confident curved lines`,
+    `- Completely empty pure white background, no shadow under the subject`,
+    `- All shapes fully CLOSED so kids can color inside without gaps`,
     `Composition: the ${type === 'celestial object' ? item.en : 'subject'} fills 70 to 80 percent of the frame, centered, full body or shape visible.`,
     `Mood: cheerful, friendly, expressive, age-appropriate cartoon style.`,
-    `Format: portrait orientation, square borders, ready for 8.5 x 11 inch KDP coloring book printing.`,
-    `IMPORTANT: this is for a children's coloring book. Just line art. No color. Pure white background.`,
+    `Output: high-contrast crisp black-and-white coloring book line art, like a printable coloring page.`,
   ].join(' ');
 }
 

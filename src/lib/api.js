@@ -46,6 +46,7 @@ export async function generateImage(item, options, signal) {
       animal_pt: item.pt,
       flux_prompt: buildFluxPrompt(item, themeId, style),
       theme: themeId,
+      style: style || 'classic',
     },
     signal
   );
