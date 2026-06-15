@@ -69,16 +69,15 @@ export async function generateImage(item, options, signal) {
  * A imagem e salva automaticamente no Google Drive pelo Make.
  */
 export async function generateCover(theme, themeId, webhookUrl, signal, bookTitle, messy) {
-  return postWebhook(
-    webhookUrl,
-    {
-      animal_en: `${themeId}-book-cover`,
-      animal_pt: `Capa — ${theme.name}`,
-      flux_prompt: buildCoverPrompt(theme, themeId, bookTitle, messy),
-      theme: themeId,
-    },
-    signal
-  );
+  const fields = {
+    animal_en: `${themeId}-book-cover`,
+    animal_pt: `Capa — ${theme.name}`,
+    flux_prompt: buildCoverPrompt(theme, themeId, bookTitle, messy),
+    theme: themeId,
+  };
+  // Guidance baixo solta o FLUX da estetica polida e permite o look "mal pintado".
+  if (messy) fields.guidance = '2';
+  return postWebhook(webhookUrl, fields, signal);
 }
 
 /**
