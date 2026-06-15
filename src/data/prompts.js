@@ -235,19 +235,19 @@ export function buildCoverPrompt(theme, themeId, bookTitle) {
   }[themeId] || 'colorful cheerful scene';
 
   const titleLine = bookTitle && bookTitle.trim()
-    ? `At the top third, the title text "${bookTitle.trim()}" written in big, fun, chunky hand-drawn CRAYON lettering, each letter a different bright color, slightly uneven and playful like a child wrote it, with bold black outline around each letter so it pops.`
+    ? `At the top third, the title text ${bookTitle.trim()} written in big, fun, chunky hand-drawn CRAYON lettering, each letter a different bright color, slightly uneven and playful like a child wrote it, with bold black outline around each letter so it pops.`
     : `Leave generous empty space at the TOP THIRD for a title to be added later.`;
 
   return [
-    `A children's coloring book COVER that looks like the pages were COLORED IN BY A CHILD with crayons.`,
+    `A childrens coloring book COVER that looks like the pages were COLORED IN BY A CHILD with crayons.`,
     `Subject: adorable cute kawaii-style ${stars}, happy smiling faces, big sparkling eyes,`,
     `grouped together joyfully in a ${habitatHint}.`,
     `CRITICAL coloring style: keep THICK BOLD BLACK OUTLINES clearly visible on everything (like a coloring book line drawing),`,
-    `then filled in with bright CRAYON coloring on top — visible crayon texture, slightly uneven strokes,`,
+    `then filled in with bright CRAYON coloring on top, visible crayon texture, slightly uneven strokes,`,
     `a little coloring going outside the lines here and there, the charming imperfect look of a happy child coloring with a crayon box.`,
     `Bright saturated primary crayon colors (red, blue, yellow, green, orange, purple).`,
     titleLine,
-    `Mood: joyful, warm, inviting, irresistibly cute, eye-catching on a store shelf, perfect for kids ages 1-8.`,
+    `Mood: joyful, warm, inviting, irresistibly cute, eye-catching on a store shelf, perfect for kids ages 1 to 8.`,
     `Portrait orientation, book cover format, white or soft pastel background border.`,
   ].join(' ');
 }

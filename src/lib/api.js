@@ -11,7 +11,19 @@
 import { buildFluxPrompt, buildCoverPrompt } from '../data/prompts.js';
 
 async function postWebhook(webhookUrl, fields, signal) {
-  const params = new URLSearchParams(fields);
+  // Sanitiza o flux_prompt: aspas, quebras de linha e caracteres de controle
+  // quebram o JSON que o Make monta para o Replicate (causa 400 Bad Request).
+  const clean = { ...fields };
+  if (clean.flux_prompt) {
+    clean.flux_prompt = clean.flux_prompt
+      .replace(/["""'']/g, '')      // remove aspas retas e curvas
+      .replace(/[\r\n\t]+/g, ' ')    // quebras de linha e tabs viram espaço
+      .replace(/[—–]/g, '-')         // travessões viram hífen simples
+      .replace(/\s+/g, ' ')          // colapsa espaços múltiplos
+      .trim();
+  }
+
+  const params = new URLSearchParams(clean);
 
   const response = await fetch(webhookUrl, {
     method: 'POST',
