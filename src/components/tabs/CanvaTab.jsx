@@ -19,6 +19,7 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
 
   // Título sugerido a partir do kdpMeta ou do nome do tema
   const [titleOnArt, setTitleOnArt] = useState(true);
+  const [messy, setMessy] = useState(false);
   const [coverTitle, setCoverTitle] = useState(
     (kdpMeta && kdpMeta.title && kdpMeta.title.trim()) || `${theme.name} Coloring Book`
   );
@@ -37,7 +38,8 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
     try {
       const data = await generateCover(
         theme, activeTheme, webhookUrl, undefined,
-        titleOnArt ? coverTitle : null
+        titleOnArt ? coverTitle : null,
+        messy
       );
       setCover(data);
       showToast('✨ Capa gerada! Salva também no seu Google Drive');
@@ -124,6 +126,24 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
                 {titleOnArt
                   ? 'O FLUX desenha o título em letras de giz de cera coloridas. Dica: títulos curtos saem melhor. Você pode refinar no Canva depois.'
                   : 'A capa virá com espaço livre no topo para você adicionar o título no Canva.'}
+              </p>
+            </div>
+
+            {/* Toggle estilo de pintura */}
+            <div style={{ marginBottom: 'var(--space-4)' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 'var(--text-sm)', fontWeight: 700, color: messy ? 'var(--accent)' : 'var(--text-muted)' }}>
+                <input
+                  type="checkbox"
+                  checked={messy}
+                  onChange={(e) => setMessy(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: 'var(--accent)', cursor: 'pointer' }}
+                />
+                🖌️ Pintura "imperfeita de criança" (sai da linha, partes sem pintar)
+              </label>
+              <p className="hint" style={{ marginTop: 6 }}>
+                {messy
+                  ? 'Aparência de giz de cera bagunçado: traços visíveis, cor saindo da linha, áreas em branco. Charme autêntico de desenho infantil.'
+                  : 'Pintura mais caprichada e uniforme (padrão).'}
               </p>
             </div>
 

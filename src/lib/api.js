@@ -68,13 +68,13 @@ export async function generateImage(item, options, signal) {
  * Gera a CAPA colorida do livro via o mesmo pipeline FLUX.
  * A imagem e salva automaticamente no Google Drive pelo Make.
  */
-export async function generateCover(theme, themeId, webhookUrl, signal, bookTitle) {
+export async function generateCover(theme, themeId, webhookUrl, signal, bookTitle, messy) {
   return postWebhook(
     webhookUrl,
     {
       animal_en: `${themeId}-book-cover`,
       animal_pt: `Capa — ${theme.name}`,
-      flux_prompt: buildCoverPrompt(theme, themeId, bookTitle),
+      flux_prompt: buildCoverPrompt(theme, themeId, bookTitle, messy),
       theme: themeId,
     },
     signal

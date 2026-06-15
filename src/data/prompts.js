@@ -116,8 +116,10 @@ export function buildFluxPrompt(item, themeId, style = 'classic') {
       `- Completely EMPTY pure white background, no scenery, no floor, no shadow under the character`,
       `- Very simple, minimal interior detail, suitable for toddlers ages 1 to 4`,
       `- All shapes fully CLOSED so kids can color inside`,
-      `Composition: the baby character fills about 75 percent of the frame, centered, full body visible.`,
-      `Output: high-contrast crisp black-and-white coloring book line art, like a printable coloring page.`,
+      `COMPOSITION (very important for a consistent book): the baby ${item.en} is CENTERED and fills about 80 percent of a TALL PORTRAIT frame,`,
+      `full body always fully visible from top to bottom with a small even margin of white space on all four sides,`,
+      `the character sized large and consistent so every page in the book matches, never tiny, never cropped or cut off at the edges.`,
+      `Output: high-contrast crisp black-and-white coloring book line art, like a printable coloring page, tall portrait 8.5x11 page ratio.`,
     ].join(' ');
   }
 
@@ -212,7 +214,7 @@ export function buildFluxPrompt(item, themeId, style = 'classic') {
  * interior que é line art). Sem texto na imagem: o título é adicionado
  * no Canva para tipografia perfeita.
  */
-export function buildCoverPrompt(theme, themeId, bookTitle) {
+export function buildCoverPrompt(theme, themeId, bookTitle, messy = false) {
   const stars = theme.items.slice(0, 4).map((i) => i.en).join(', ');
   const habitatHint = {
     selva: 'lush green jungle with tropical leaves and flowers',
@@ -238,13 +240,25 @@ export function buildCoverPrompt(theme, themeId, bookTitle) {
     ? `At the top third, the title text ${bookTitle.trim()} written in big, fun, chunky hand-drawn CRAYON lettering, each letter a different bright color, slightly uneven and playful like a child wrote it, with bold black outline around each letter so it pops.`
     : `Leave generous empty space at the TOP THIRD for a title to be added later.`;
 
+  const coloringStyle = messy
+    ? [
+        `COLORING STYLE (very important): it must look like a REAL YOUNG CHILD colored it with crayons, charmingly imperfect and messy.`,
+        `Keep THICK BOLD BLACK OUTLINES clearly visible underneath (a coloring book line drawing showing through).`,
+        `The crayon coloring is loose and playful: scribbly visible crayon strokes, color going OUTSIDE the lines in many places,`,
+        `some areas left only partly colored or completely WHITE and unfinished, uneven pressure, patches of overlapping colors,`,
+        `streaky waxy crayon texture, NOT neat, NOT filled completely, like a happy toddler colored it in a hurry.`,
+      ].join(' ')
+    : [
+        `CRITICAL coloring style: keep THICK BOLD BLACK OUTLINES clearly visible on everything (like a coloring book line drawing),`,
+        `then filled in with bright CRAYON coloring on top, visible crayon texture, slightly uneven strokes,`,
+        `a little coloring going outside the lines here and there, the charming imperfect look of a happy child coloring with a crayon box.`,
+      ].join(' ');
+
   return [
     `A childrens coloring book COVER that looks like the pages were COLORED IN BY A CHILD with crayons.`,
     `Subject: adorable cute kawaii-style ${stars}, happy smiling faces, big sparkling eyes,`,
     `grouped together joyfully in a ${habitatHint}.`,
-    `CRITICAL coloring style: keep THICK BOLD BLACK OUTLINES clearly visible on everything (like a coloring book line drawing),`,
-    `then filled in with bright CRAYON coloring on top, visible crayon texture, slightly uneven strokes,`,
-    `a little coloring going outside the lines here and there, the charming imperfect look of a happy child coloring with a crayon box.`,
+    coloringStyle,
     `Bright saturated primary crayon colors (red, blue, yellow, green, orange, purple).`,
     titleLine,
     `Mood: joyful, warm, inviting, irresistibly cute, eye-catching on a store shelf, perfect for kids ages 1 to 8.`,
