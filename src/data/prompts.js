@@ -242,11 +242,15 @@ export function buildCoverPrompt(theme, themeId, bookTitle, messy = false) {
 
   const coloringStyle = messy
     ? [
-        `COLORING STYLE (very important): it must look like a REAL YOUNG CHILD colored it with crayons, charmingly imperfect and messy.`,
-        `Keep THICK BOLD BLACK OUTLINES clearly visible underneath (a coloring book line drawing showing through).`,
-        `The crayon coloring is loose and playful: scribbly visible crayon strokes, color going OUTSIDE the lines in many places,`,
-        `some areas left only partly colored or completely WHITE and unfinished, uneven pressure, patches of overlapping colors,`,
-        `streaky waxy crayon texture, NOT neat, NOT filled completely, like a happy toddler colored it in a hurry.`,
+        `COLORING STYLE — READ CAREFULLY, THIS IS THE MOST IMPORTANT PART:`,
+        `This must look like a 4-year-old child colored it with cheap wax crayons. It is INTENTIONALLY AMATEUR and MESSY, NOT professional, NOT digital, NOT smooth.`,
+        `The base is a simple BLACK LINE drawing (bold outlines clearly visible everywhere).`,
+        `On top, rough childish CRAYON scribbles: thick visible waxy crayon strokes going in different directions,`,
+        `color clearly SPILLING OUTSIDE the black outlines and overshooting the edges,`,
+        `large areas left totally UNCOLORED and WHITE (unfinished, like the kid got bored),`,
+        `uneven blotchy pressure, scribbly back-and-forth strokes, colors overlapping sloppily, gaps and white streaks within each colored area.`,
+        `Absolutely NOT smooth, NOT airbrushed, NOT gradient, NOT neat, NOT digital painting. Flat matte crayon texture only.`,
+        `Think childs refrigerator drawing, kindergarten art, deliberately imperfect and charming.`,
       ].join(' ')
     : [
         `CRITICAL coloring style: keep THICK BOLD BLACK OUTLINES clearly visible on everything (like a coloring book line drawing),`,
@@ -255,13 +259,15 @@ export function buildCoverPrompt(theme, themeId, bookTitle, messy = false) {
       ].join(' ');
 
   return [
-    `A childrens coloring book COVER that looks like the pages were COLORED IN BY A CHILD with crayons.`,
+    messy
+      ? `A childrens coloring book COVER colored by a young child with wax crayons, deliberately messy amateur kindergarten style.`
+      : `A childrens coloring book COVER that looks like the pages were COLORED IN BY A CHILD with crayons.`,
     `Subject: adorable cute kawaii-style ${stars}, happy smiling faces, big sparkling eyes,`,
     `grouped together joyfully in a ${habitatHint}.`,
     coloringStyle,
-    `Bright saturated primary crayon colors (red, blue, yellow, green, orange, purple).`,
+    `Crayon colors: bright primary wax-crayon colors (red, blue, yellow, green, orange, purple).`,
     titleLine,
-    `Mood: joyful, warm, inviting, irresistibly cute, eye-catching on a store shelf, perfect for kids ages 1 to 8.`,
-    `Portrait orientation, book cover format, white or soft pastel background border.`,
+    `Mood: joyful, warm, inviting, perfect for kids ages 1 to 8.`,
+    `Portrait orientation, book cover format, white background.`,
   ].join(' ');
 }
