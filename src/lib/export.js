@@ -9,7 +9,7 @@
 
 import { THEMES } from '../data/themes.js';
 import { permanentImageUrl, permanentImageUrlHiRes } from './format.js';
-import { resolveEnglishName } from '../data/animal-names-en.js';
+import { resolveEnglishName, resolvePortugueseName } from '../data/animal-names-en.js';
 
 /**
  * Filtra histórico por tema. "all" retorna tudo.
@@ -112,13 +112,13 @@ export function exportInteriorHTML(history, themeId, meta = {}) {
 
   const openingPages = `
     <div class="page title-page">
-      <p class="title-main">${titleLines}</p>
-      ${bookSubtitle ? `<p class="title-sub">${bookSubtitle}</p>` : ''}
-      <p class="title-note">Big &amp; easy designs for little hands</p>
+      <p class="title-main" data-en="${titleLines}" data-pt="Meu Primeiro<br>Livro de Colorir">${titleLines}</p>
+      <p class="title-sub" data-en="${bookSubtitle || 'Baby Animals'}" data-pt="Filhotes de Animais">${bookSubtitle || 'Baby Animals'}</p>
+      <p class="title-note" data-en="Big &amp; easy designs for little hands" data-pt="Desenhos grandes e fáceis para mãozinhas">Big &amp; easy designs for little hands</p>
     </div>
     <div class="page belongs-page">
       <div class="belongs-frame">
-        <p class="belongs-label">This book belongs to</p>
+        <p class="belongs-label" data-en="This book belongs to" data-pt="Este livro pertence a">This book belongs to</p>
         <div class="belongs-line"></div>
         <p class="belongs-hint">&#9733; &#9734; &#9733;</p>
       </div>
@@ -127,11 +127,12 @@ export function exportInteriorHTML(history, themeId, meta = {}) {
   const pages = items
     .map((h) => {
       const name = resolveEnglishName(h);
+      const namePt = resolvePortugueseName(h);
       const hi = permanentImageUrlHiRes(h);
       return `
     <div class="page">
       <div class="art"><img src="${hi}" alt="${name}" onerror="this.style.opacity=.15" /></div>
-      <p class="label" contenteditable="true" spellcheck="false" data-placeholder="(type name)">${name}</p>
+      <p class="label" contenteditable="true" spellcheck="false" data-placeholder="(type name)" data-en="${name}" data-pt="${namePt}">${name}</p>
     </div>`;
     })
     .join('');
@@ -208,10 +209,24 @@ export function exportInteriorHTML(history, themeId, meta = {}) {
 </head>
 <body>
   <div class="toolbar">
-    <span>📖 <b>${items.length} páginas</b> · formato 8,5×8,5" pronto para KDP</span>
-    <span>✏️ Clique em qualquer nome para editar ou preencher os em branco</span>
+    <span>📖 <b>${items.length} páginas</b> · 8,5×8,5" pronto para KDP</span>
+    <span>✏️ Clique num nome para editar</span>
+    <button onclick="toggleLang()" id="langBtn" style="background:#3a7;">🇧🇷 Ver em Português</button>
     <button onclick="window.print()">🖨 Salvar como PDF</button>
   </div>
+  <script>
+    var currentLang = 'en';
+    function toggleLang() {
+      currentLang = currentLang === 'en' ? 'pt' : 'en';
+      document.querySelectorAll('[data-en]').forEach(function(el) {
+        var val = el.getAttribute('data-' + currentLang);
+        if (val !== null && val !== '') el.innerHTML = val;
+      });
+      document.getElementById('langBtn').textContent =
+        currentLang === 'en' ? '🇧🇷 Ver em Português' : '🇺🇸 Ver em Inglês';
+      document.title = (currentLang === 'en' ? '${bookTitle}' : 'Meu Primeiro Livro de Colorir') + ' — KDP Interior';
+    }
+  </script>
   ${openingPages}${pages}
 </body>
 </html>`;

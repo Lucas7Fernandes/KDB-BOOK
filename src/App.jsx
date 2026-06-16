@@ -43,6 +43,7 @@ export default function App() {
   const [bookStatus,  setBookStatus]  = usePersistedJSON(STORAGE_KEYS.BOOK_STATUS, {});
   const [kdpCheck,    setKdpCheck]    = usePersistedJSON(STORAGE_KEYS.KDP_CHECK,   {});
   const [kdpMeta,     setKdpMeta]     = usePersistedJSON(STORAGE_KEYS.KDP_META,    DEFAULT_KDP_META);
+  const [officialCover, setOfficialCover] = usePersistedJSON(STORAGE_KEYS.OFFICIAL_COVER, null);
   const [activeTheme, setActiveTheme] = usePersistedState(STORAGE_KEYS.ACTIVE_THEME, 'selva');
   const [artStyle,    setArtStyle]    = usePersistedState(STORAGE_KEYS.ART_STYLE,    'classic');
   const [turbo,       setTurbo]       = usePersistedState(STORAGE_KEYS.TURBO, false,
@@ -321,6 +322,8 @@ export default function App() {
             history={history}
             webhookUrl={webhookUrl}
             kdpMeta={kdpMeta}
+            officialCover={officialCover}
+            setOfficialCover={setOfficialCover}
             showToast={showToast}
           />
         )}

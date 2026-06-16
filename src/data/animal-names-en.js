@@ -37,6 +37,23 @@ function titleCase(s) {
 }
 
 /**
+ * Resolve o melhor nome em PORTUGUÊS para um item.
+ * Usa animal_pt se válido; senão tenta mapa reverso EN->PT.
+ */
+export function resolvePortugueseName(item) {
+  const pt = (item.animal_pt || '').trim();
+  if (pt && !/^untitled$/i.test(pt) && !pt.toLowerCase().startsWith('capa')) {
+    return titleCase(pt);
+  }
+  // mapa reverso a partir do EN resolvido
+  const en = resolveEnglishName(item);
+  for (const [k, v] of Object.entries(PT_TO_EN)) {
+    if (v.toLowerCase() === en.toLowerCase()) return titleCase(k);
+  }
+  return '';
+}
+
+/**
  * Resolve o melhor nome em inglês para um item do histórico.
  * Ordem: animal_en (se válido) -> dicionário PT -> título do PT -> vazio.
  * Retorna '' quando não consegue resolver (para o usuário preencher).

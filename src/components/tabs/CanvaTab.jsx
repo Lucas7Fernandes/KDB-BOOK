@@ -10,7 +10,7 @@ import { SectionGroup, Button, EmptyState, Spinner } from '../ui.jsx';
  * Aba Capa — gera arte de capa colorida e fofa via FLUX (mesmo pipeline),
  * com fluxo guiado para finalizar o título no Canva.
  */
-export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast }) {
+export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, officialCover, setOfficialCover, showToast }) {
   const [loading, setLoading] = useState(false);
   const [cover, setCover] = useState(null);
   const [error, setError] = useState(null);
@@ -195,7 +195,49 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
                   ⬇ Baixar imagem
                 </a>
               )}
+
+              {(cover || savedCovers[0]) && (
+                (() => {
+                  const current = cover || savedCovers[0];
+                  const isOfficial = officialCover && current &&
+                    (officialCover.drive_file_id === current.drive_file_id ||
+                     officialCover.image_url === current.image_url);
+                  return (
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        if (isOfficial) {
+                          setOfficialCover(null);
+                          showToast('Capa oficial removida');
+                        } else {
+                          setOfficialCover({ ...current, markedAt: new Date().toISOString() });
+                          showToast('✓ Definida como capa oficial do livro!');
+                        }
+                      }}
+                      style={{
+                        border: `2px solid ${isOfficial ? 'var(--success)' : 'var(--border-default)'}`,
+                        background: isOfficial ? '#E8F4EC' : 'var(--bg-base)',
+                        color: isOfficial ? 'var(--success)' : 'var(--text-secondary)',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {isOfficial ? '✓ Capa oficial do livro' : '📕 Marcar como capa oficial'}
+                    </button>
+                  );
+                })()
+              )}
             </div>
+
+            {officialCover && (
+              <div style={{ marginTop: 'var(--space-3)', padding: '10px 14px', background: '#E8F4EC', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <img src={permanentImageUrl(officialCover)} alt="Capa oficial" style={{ width: 44, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border-default)' }} />
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 700, color: 'var(--success)', fontSize: 'var(--text-sm)', margin: 0 }}>📕 Capa oficial definida</p>
+                  <p className="hint" style={{ margin: 0 }}>Esta é a capa do seu livro. Baixe-a e use no upload de capa do KDP.</p>
+                </div>
+                <a href={permanentImageUrl(officialCover)} target="_blank" rel="noreferrer" className="btn btn-accent" style={{ textDecoration: 'none', fontSize: 'var(--text-sm)' }}>⬇</a>
+              </div>
+            )}
             {qty > 1 && !loading && (
               <p className="hint" style={{ marginTop: 6 }}>
                 Vai gerar {qty} versões diferentes em fila (uma por vez, ~60s cada = ~{Math.ceil(qty * 60 / 60)} min). Custo: ${(qty * 0.03).toFixed(2)}. Escolha a melhor depois.

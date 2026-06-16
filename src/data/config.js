@@ -27,4 +27,6 @@ export const STORAGE_KEYS = {
   ACTIVE_THEME:  'kdp_active_theme',
   ART_STYLE:     'kdp_art_style',
   TURBO:         'kdp_turbo',
+  OFFICIAL_COVER: 'kdp_official_cover',
+  BOOK_LANG:      'kdp_book_lang',
 };
