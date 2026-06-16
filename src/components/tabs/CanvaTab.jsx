@@ -20,6 +20,9 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
   // Título sugerido a partir do kdpMeta ou do nome do tema
   const [titleOnArt, setTitleOnArt] = useState(true);
   const [messy, setMessy] = useState(false);
+  const [qty, setQty] = useState(1);
+  const [covers, setCovers] = useState([]); // múltiplas versões geradas nesta sessão
+  const [progress, setProgress] = useState(null); // { done, total }
   const [coverTitle, setCoverTitle] = useState(
     (kdpMeta && kdpMeta.title && kdpMeta.title.trim()) || `${theme.name} Coloring Book`
   );
@@ -34,20 +37,35 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
   const doGenerate = async () => {
     setLoading(true);
     setError(null);
-    showToast('Gerando arte da capa... (~60s)');
+    const total = qty;
+    setProgress(total > 1 ? { done: 0, total } : null);
+    showToast(total > 1 ? `Gerando ${total} versões em fila... (~60s cada)` : 'Gerando arte da capa... (~60s)');
+
+    const results = [];
     try {
-      const data = await generateCover(
-        theme, activeTheme, webhookUrl, undefined,
-        titleOnArt ? coverTitle : null,
-        messy
-      );
-      setCover(data);
-      showToast('✨ Capa gerada! Salva também no seu Google Drive');
-    } catch (err) {
-      setError(err.message);
-      showToast(`Erro: ${err.message}`, 'error');
+      // Fila sequencial: uma capa por vez, para não saturar o Replicate
+      for (let i = 0; i < total; i++) {
+        try {
+          const data = await generateCover(
+            theme, activeTheme, webhookUrl, undefined,
+            titleOnArt ? coverTitle : null,
+            messy
+          );
+          results.push(data);
+          setCovers((prev) => [data, ...prev]);
+          setCover(data);
+        } catch (err) {
+          setError(err.message);
+          showToast(`Erro na versão ${i + 1}: ${err.message}`, 'error');
+        }
+        if (total > 1) setProgress({ done: i + 1, total });
+      }
+      if (results.length > 0) {
+        showToast(`✨ ${results.length} capa(s) gerada(s)! Salvas no Google Drive`);
+      }
     } finally {
       setLoading(false);
+      setProgress(null);
     }
   };
 
@@ -147,22 +165,42 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
               <button className="btn btn-primary" onClick={doGenerate} disabled={loading}>
-                {loading ? '⏳ Gerando capa...' : '✨ Gerar arte da capa'}
+                {loading
+                  ? (progress ? `⏳ Gerando ${progress.done}/${progress.total}...` : '⏳ Gerando capa...')
+                  : `✨ Gerar ${qty > 1 ? `${qty} versões` : 'arte da capa'}`}
               </button>
+
+              {/* Seletor de quantidade */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, border: '2px solid var(--border-default)', borderRadius: 'var(--radius-lg)', padding: '4px 6px' }}>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 700, paddingLeft: 4 }}>Versões</span>
+                <button
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  disabled={loading || qty <= 1}
+                  aria-label="Menos versões"
+                  style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-base)', cursor: 'pointer', fontWeight: 800, fontSize: 16 }}
+                >−</button>
+                <span style={{ minWidth: 20, textAlign: 'center', fontWeight: 800, fontSize: 'var(--text-md)' }}>{qty}</span>
+                <button
+                  onClick={() => setQty((q) => Math.min(10, q + 1))}
+                  disabled={loading || qty >= 10}
+                  aria-label="Mais versões"
+                  style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-base)', cursor: 'pointer', fontWeight: 800, fontSize: 16 }}
+                >+</button>
+              </div>
+
               {latestCover && (
-                <a
-                  href={latestCover}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-accent"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href={latestCover} target="_blank" rel="noreferrer" className="btn btn-accent" style={{ textDecoration: 'none' }}>
                   ⬇ Baixar imagem
                 </a>
               )}
             </div>
+            {qty > 1 && !loading && (
+              <p className="hint" style={{ marginTop: 6 }}>
+                Vai gerar {qty} versões diferentes em fila (uma por vez, ~60s cada = ~{Math.ceil(qty * 60 / 60)} min). Custo: ${(qty * 0.03).toFixed(2)}. Escolha a melhor depois.
+              </p>
+            )}
             {error && (
               <p style={{ marginTop: 'var(--space-3)', color: 'var(--error)', fontSize: 'var(--text-sm)' }}>
                 {error}
@@ -190,6 +228,30 @@ export function CanvaTab({ activeTheme, history, webhookUrl, kdpMeta, showToast 
                 loading="lazy"
               />
             </a>
+          )}
+
+          {/* Galeria de versões geradas nesta sessão */}
+          {covers.length > 1 && (
+            <div style={{ marginTop: 'var(--space-3)' }}>
+              <p style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-muted)', margin: '0 0 6px' }}>
+                {covers.length} versões geradas — clique para abrir e comparar:
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: 6 }}>
+                {covers.map((c, i) => {
+                  const url = permanentImageUrl(c);
+                  return url ? (
+                    <a key={i} href={url} target="_blank" rel="noreferrer" style={{ display: 'block' }}>
+                      <img
+                        src={url}
+                        alt={`Versão ${covers.length - i}`}
+                        style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}
+                        loading="lazy"
+                      />
+                    </a>
+                  ) : null;
+                })}
+              </div>
+            </div>
           )}
         </div>
       </div>

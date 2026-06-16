@@ -109,3 +109,11 @@ export async function syncDrive(webhookUrl, signal) {
     return { drive_file_id: id, name, theme, animal_en: animalEn };
   });
 }
+
+/**
+ * Exclui um arquivo do Google Drive via rota "delete" do Make.
+ * Usado quando o usuário remove uma imagem do histórico.
+ */
+export async function deleteDriveFile(webhookUrl, driveFileId, signal) {
+  return postWebhook(webhookUrl, { action: 'delete', drive_file_id: driveFileId }, signal);
+}

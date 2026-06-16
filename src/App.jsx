@@ -248,6 +248,15 @@ export default function App() {
 
   const clearGenerations = () => { setGenerations({}); setSelected(new Set()); };
 
+  // ── Histórico: favoritar e selecionar para o livro ──
+  const toggleFavorite = useCallback((id) => {
+    setHistory(prev => prev.map(h => h.id === id ? { ...h, favorite: !h.favorite } : h));
+  }, [setHistory]);
+
+  const toggleInBook = useCallback((id) => {
+    setHistory(prev => prev.map(h => h.id === id ? { ...h, inBook: !h.inBook } : h));
+  }, [setHistory]);
+
   // ── Render ──
   return (
     <div className="app">
@@ -356,9 +365,10 @@ export default function App() {
             setHistory={setHistory}
             historyFilter={historyFilter}
             setHistoryFilter={setHistoryFilter}
+            toggleFavorite={toggleFavorite}
+            toggleInBook={toggleInBook}
             showToast={showToast}
-          />
-        )}
+          />)}
 
         {tab === 'guia' && <GuideTab />}
 
