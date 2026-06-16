@@ -47,3 +47,14 @@ export function permanentImageUrl(item) {
   }
   return item?.image_url || '';
 }
+
+/**
+ * Versão em alta resolução para impressão (KDP): pede ao Drive o lado maior
+ * em ~2550px (300 DPI em 8.5in). Cai para a URL normal se não houver file_id.
+ */
+export function permanentImageUrlHiRes(item, px = 2550) {
+  if (item?.drive_file_id) {
+    return `https://lh3.googleusercontent.com/d/${item.drive_file_id}=s${px}`;
+  }
+  return item?.image_url || '';
+}

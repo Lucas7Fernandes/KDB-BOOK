@@ -8,7 +8,8 @@
  */
 
 import { THEMES } from '../data/themes.js';
-import { permanentImageUrl } from './format.js';
+import { permanentImageUrl, permanentImageUrlHiRes } from './format.js';
+import { resolveEnglishName } from '../data/animal-names-en.js';
 
 /**
  * Filtra histórico por tema. "all" retorna tudo.
@@ -103,37 +104,36 @@ export function exportInteriorHTML(history, themeId, meta = {}) {
   const items = filterByTheme(history, themeId);
   if (items.length === 0) return { ok: false, count: 0 };
 
-  const themeName = themeId === 'all'
-    ? 'Coloring Book'
-    : THEMES[themeId]?.name || themeId;
-
-  const bookTitle = meta.title?.trim() || `${themeName} — Coloring Book`;
-  const bookSubtitle = meta.subtitle?.trim() || `${items.length} cute designs to color`;
+  const bookTitle = meta.title?.trim() || 'My First Coloring Book';
+  const bookSubtitle = meta.subtitle?.trim() || '';
+  const titleLines = bookTitle.split(/\s+/).length > 2
+    ? bookTitle.replace(/^(\S+\s\S+)\s/, '$1<br>')
+    : bookTitle;
 
   const openingPages = `
     <div class="page title-page">
-      <div class="title-frame">
-        <p class="title-main">${bookTitle}</p>
-        <div class="title-divider"></div>
-        <p class="title-sub">${bookSubtitle}</p>
-      </div>
+      <p class="title-main">${titleLines}</p>
+      ${bookSubtitle ? `<p class="title-sub">${bookSubtitle}</p>` : ''}
+      <p class="title-note">Big &amp; easy designs for little hands</p>
     </div>
     <div class="page belongs-page">
       <div class="belongs-frame">
         <p class="belongs-label">This book belongs to</p>
         <div class="belongs-line"></div>
-        <p class="belongs-hint">★ ☆ ★</p>
+        <p class="belongs-hint">&#9733; &#9734; &#9733;</p>
       </div>
     </div>`;
 
   const pages = items
-    .map(
-      (h) => `
+    .map((h) => {
+      const name = resolveEnglishName(h);
+      const hi = permanentImageUrlHiRes(h);
+      return `
     <div class="page">
-      <img src="${permanentImageUrl(h)}" alt="${h.animal_pt}" onerror="this.style.opacity=.2" />
-      <p class="label">${h.animal_pt}</p>
-    </div>`
-    )
+      <div class="art"><img src="${hi}" alt="${name}" onerror="this.style.opacity=.15" /></div>
+      <p class="label" contenteditable="true" spellcheck="false" data-placeholder="(type name)">${name}</p>
+    </div>`;
+    })
     .join('');
 
   const content = `<!DOCTYPE html>
@@ -141,89 +141,79 @@ export function exportInteriorHTML(history, themeId, meta = {}) {
 <head>
   <meta charset="UTF-8" />
   <title>${bookTitle} — KDP Interior</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    @page {
-      size: 8.5in 11in;
-      margin: 0.375in 0.375in 0.375in 0.5in;
+    @page { size: 8.5in 8.5in; margin: 0; }
+    html, body { background: #fff; color: #1a1a1a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: 'Fredoka', sans-serif; }
+
+    .toolbar {
+      position: sticky; top: 0; z-index: 10;
+      background: #1a1a1a; color: #fff; padding: 12px 18px;
+      font-family: 'Fredoka', sans-serif; font-size: 14px;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
     }
-    body { font-family: 'Helvetica', Arial, sans-serif; background: white; color: black; }
+    .toolbar b { color: #ffd27a; }
+    .toolbar button {
+      background: #e8602c; color: #fff; border: none; border-radius: 8px;
+      padding: 8px 16px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 14px;
+    }
+    @media print { .toolbar { display: none; } }
+
     .page {
-      width: 100%;
-      height: 10.25in;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      page-break-after: always;
-      break-after: page;
+      width: 8.5in; height: 8.5in;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      page-break-after: always; break-after: page;
+      padding: 0.55in 0.5in 0.45in 0.65in;
+      position: relative;
+      margin: 0 auto;
     }
     .page:last-child { page-break-after: auto; }
-    .page img {
-      max-width: 100%;
-      max-height: 9.3in;
-      object-fit: contain;
+    @media screen {
+      .page { box-shadow: 0 2px 16px rgba(0,0,0,.12); margin: 16px auto; }
     }
+
+    .art { flex: 1 1 auto; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
+    .art img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+
     .label {
-      margin-top: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      text-align: center;
-      color: #333;
-      letter-spacing: 0.05em;
+      margin-top: 0.12in;
+      font-family: 'Baloo 2', cursive;
+      font-size: 30px; font-weight: 700;
+      color: #2b2b2b; text-align: center; letter-spacing: 0.02em;
+      min-width: 2in; padding: 2px 10px; border-radius: 8px;
+      outline: none;
     }
-    /* ── Title page ── */
-    .title-frame {
-      border: 4px solid #000;
-      border-radius: 24px;
-      padding: 80px 60px;
-      text-align: center;
-      max-width: 80%;
+    .label:empty:before {
+      content: attr(data-placeholder); color: #c00; font-style: italic; font-weight: 500;
     }
-    .title-main {
-      font-size: 42px;
-      font-weight: 900;
-      line-height: 1.25;
-      letter-spacing: 0.01em;
+    @media screen {
+      .label:hover, .label:focus { background: #fff5e6; box-shadow: inset 0 0 0 2px #e8602c33; }
     }
-    .title-divider {
-      width: 120px;
-      height: 4px;
-      background: #000;
-      border-radius: 4px;
-      margin: 28px auto;
-    }
-    .title-sub {
-      font-size: 20px;
-      color: #444;
-      letter-spacing: 0.06em;
-    }
-    /* ── Belongs page ── */
-    .belongs-frame {
-      border: 3px dashed #000;
-      border-radius: 20px;
-      padding: 70px 80px;
-      text-align: center;
-    }
-    .belongs-label {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 48px;
-      letter-spacing: 0.04em;
-    }
-    .belongs-line {
-      width: 320px;
-      border-bottom: 3px solid #000;
-      margin: 0 auto 40px;
-      height: 48px;
-    }
-    .belongs-hint {
-      font-size: 24px;
-      letter-spacing: 0.5em;
-    }
+
+    .title-page { justify-content: center; }
+    .title-main { font-family: 'Baloo 2', cursive; font-size: 62px; font-weight: 800; line-height: 1.05; color: #1a1a1a; text-align: center; margin-bottom: 0.25in; }
+    .title-sub { font-family: 'Baloo 2', cursive; font-size: 40px; font-weight: 700; color: #e8602c; text-align: center; letter-spacing: 0.03em; margin-bottom: 0.5in; }
+    .title-note { font-family: 'Fredoka', sans-serif; font-size: 22px; color: #888; text-align: center; }
+
+    .belongs-frame { border: 3px dashed #cfcfcf; border-radius: 28px; padding: 0.9in 1in; text-align: center; }
+    .belongs-label { font-family: 'Baloo 2', cursive; font-size: 40px; font-weight: 700; margin-bottom: 0.6in; color: #2b2b2b; }
+    .belongs-line { width: 4in; border-bottom: 3px solid #1a1a1a; margin: 0 auto 0.5in; height: 0.7in; }
+    .belongs-hint { font-size: 34px; letter-spacing: 0.4em; color: #e8602c; }
   </style>
 </head>
-<body>${openingPages}${pages}</body>
+<body>
+  <div class="toolbar">
+    <span>📖 <b>${items.length} páginas</b> · formato 8,5×8,5" pronto para KDP</span>
+    <span>✏️ Clique em qualquer nome para editar ou preencher os em branco</span>
+    <button onclick="window.print()">🖨 Salvar como PDF</button>
+  </div>
+  ${openingPages}${pages}
+</body>
 </html>`;
 
   downloadBlob(content, `interior-${themeId}.html`, 'text/html');
