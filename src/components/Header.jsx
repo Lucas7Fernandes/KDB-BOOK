@@ -28,6 +28,7 @@ export function Header({ tab, setTab, historyCount, kdpDone, inBookCount = 0, ha
 
   const more = [
     ['foto',     '📸', 'Foto → Colorir'],
+    ['tratar',   '🧽', 'Limpar fundo'],
     ['seo',      '🔍', 'SEO & Keywords'],
     ['catalogo', '📦', 'Catálogo de livros'],
     ['financas', '📊', 'Finanças & ROI'],

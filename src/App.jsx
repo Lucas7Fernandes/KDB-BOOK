@@ -21,6 +21,7 @@ import { KdpTab }       from './components/tabs/KdpTab.jsx';
 import { SeoTab }       from './components/tabs/SeoTab.jsx';
 import { CanvaTab }     from './components/tabs/CanvaTab.jsx';
 import { PhotoTab }     from './components/tabs/PhotoTab.jsx';
+import { ProcessTab }   from './components/tabs/ProcessTab.jsx';
 import { HistoryTab }   from './components/tabs/HistoryTab.jsx';
 import { SettingsTab }  from './components/tabs/SettingsTab.jsx';
 import { GuideTab }     from './components/tabs/GuideTab.jsx';
@@ -343,6 +344,13 @@ export default function App() {
             activeTheme={activeTheme}
             photoWebhookUrl={photoWebhookUrl}
             addToHistory={addPhotoToHistory}
+            showToast={showToast}
+          />
+        )}
+
+        {tab === 'tratar' && (
+          <ProcessTab
+            history={history}
             showToast={showToast}
           />
         )}
