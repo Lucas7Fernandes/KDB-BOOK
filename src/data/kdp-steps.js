@@ -20,18 +20,18 @@ export const KDP_STEPS = [
   },
   {
     id: 'images',
-    label: 'Gerar 20 imagens (aba Gerar)',
-    tip: 'Selecione o tema, clique em "Selecionar Todos" e depois "Gerar". Custo total: $0.60. Tempo: ~60s em paralelo. URLs ficam salvas no Histórico.',
+    label: 'Gerar 30+ imagens (aba Criar)',
+    tip: 'Escolha o estilo e tema, clique em "Todos" e "Gerar". Use o Turbo se o saldo Replicate for ≥ $10. As imagens ficam salvas na Biblioteca.',
   },
   {
     id: 'interior',
-    label: 'Montar PDF interior',
-    tip: '8.5×11 polegadas, B&W. Uma imagem por página. Margem interna (gutter) de 0.375 polegadas. Total ~22 páginas com capa, verso e créditos.',
+    label: 'Montar PDF do miolo (Biblioteca)',
+    tip: 'Marque as imagens com "+ Incluir no livro", clique em "HTML interior", revise os nomes e salve como PDF. Já sai no formato 8,5×8,5", em inglês, alta resolução.',
   },
   {
     id: 'cover',
-    label: 'Criar capa (Canva template KDP)',
-    tip: 'Canva tem templates KDP gratuitos. Use a calculadora de capa KDP para dimensões exatas baseadas na contagem de páginas. Exporte em 300 DPI.',
+    label: 'Definir capa oficial (aba Capa)',
+    tip: 'Gere as versões que quiser, clique em "Marcar como capa oficial" na melhor. Finalize no Canva (faixa etária + marca + contracapa) usando o template KDP, e exporte em PDF 300 DPI.',
   },
   {
     id: 'title',

@@ -261,7 +261,14 @@ export default function App() {
   // ── Render ──
   return (
     <div className="app">
-      <Header tab={tab} setTab={setTab} historyCount={history.length} kdpDone={kdpDone} />
+      <Header
+        tab={tab}
+        setTab={setTab}
+        historyCount={history.length}
+        kdpDone={kdpDone}
+        inBookCount={history.filter((h) => h.inBook).length}
+        hasCover={!!officialCover}
+      />
 
       <Dashboard
         balanceInput={balanceInput}
@@ -297,7 +304,13 @@ export default function App() {
             }
           }
           if (tab === 'canva') {
-            return <JourneyBanner icon="🚀" text="Gere e marque sua capa oficial. Com capa e miolo prontos, é hora de publicar." ctaLabel="Ir para Publicar →" onCta={() => setTab('kdp')} />;
+            if (officialCover) {
+              return <JourneyBanner icon="🚀" text="Capa oficial definida! Com miolo e capa prontos, é hora de publicar na Amazon." ctaLabel="Ir para Publicar →" onCta={() => setTab('kdp')} tone="success" />;
+            }
+            return <JourneyBanner icon="📕" text="Gere as versões de capa que quiser e clique em “Marcar como capa oficial” na sua preferida." />;
+          }
+          if (tab === 'kdp') {
+            return <JourneyBanner icon="📋" text="Copie os metadados, faça upload do miolo e da capa no KDP, e peça uma cópia de prova antes de publicar." />;
           }
           return null;
         })()}

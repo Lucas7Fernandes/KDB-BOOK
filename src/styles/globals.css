@@ -347,6 +347,13 @@ input:focus, textarea:focus, select:focus {
   background: var(--accent);
   color: #fff;
 }
+.nav-journey.is-done .nav-step {
+  background: var(--success);
+  color: #fff;
+}
+.nav-journey.is-done.is-active .nav-step {
+  background: var(--accent);
+}
 
 .nav-divider {
   width: 1px;

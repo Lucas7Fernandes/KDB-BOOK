@@ -4,8 +4,16 @@ import { useState } from 'react';
  * Header com jornada LINEAR de publicação (1→4) + secundários.
  * O fluxo principal fica numerado e óbvio; extras ficam no menu "Mais".
  */
-export function Header({ tab, setTab, historyCount, kdpDone }) {
+export function Header({ tab, setTab, historyCount, kdpDone, inBookCount = 0, hasCover = false }) {
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // Etapas concluídas (para mostrar ✓ verde)
+  const done = {
+    gerar:   historyCount > 0,
+    history: inBookCount > 0,
+    canva:   hasCover,
+    kdp:     kdpDone >= 12,
+  };
 
   const journey = [
     ['gerar',   '1', '🖼', 'Criar'],
@@ -46,9 +54,9 @@ export function Header({ tab, setTab, historyCount, kdpDone }) {
             role="tab"
             aria-selected={tab === key}
             onClick={() => pick(key)}
-            className={`nav-item nav-journey ${tab === key ? 'is-active' : ''}`}
+            className={`nav-item nav-journey ${tab === key ? 'is-active' : ''} ${done[key] ? 'is-done' : ''}`}
           >
-            <span className="nav-step" aria-hidden="true">{num}</span>
+            <span className="nav-step" aria-hidden="true">{done[key] && tab !== key ? '✓' : num}</span>
             <span aria-hidden="true">{icon}</span>
             <span>{label}</span>
           </button>
