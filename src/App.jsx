@@ -12,7 +12,7 @@ import { initNotifications, requestNotifyPermission, notify } from './lib/notify
 
 import { Header } from './components/Header.jsx';
 import { Dashboard } from './components/Dashboard.jsx';
-import { ProgressBar, Toast } from './components/ui.jsx';
+import { ProgressBar, Toast, JourneyBanner } from './components/ui.jsx';
 
 import { GenerateTab }  from './components/tabs/GenerateTab.jsx';
 import { CatalogTab }   from './components/tabs/CatalogTab.jsx';
@@ -283,6 +283,24 @@ export default function App() {
       )}
 
       <main className="main">
+        {(() => {
+          const inBookCount = history.filter((h) => h.inBook).length;
+          if (tab === 'gerar' && history.length > 0) {
+            return <JourneyBanner icon="📚" text={`Você já tem ${history.length} ${history.length === 1 ? 'imagem' : 'imagens'}. Quando terminar de criar, vá para a Biblioteca para escolher as do livro.`} ctaLabel="Ir para Biblioteca →" onCta={() => setTab('history')} />;
+          }
+          if (tab === 'history') {
+            if (inBookCount === 0 && history.length > 0) {
+              return <JourneyBanner icon="✓" text="Marque as imagens que vão no livro com “+ Incluir no livro”. Depois exporte o miolo em PDF." />;
+            }
+            if (inBookCount > 0) {
+              return <JourneyBanner icon="🎨" text={`${inBookCount} ${inBookCount === 1 ? 'imagem selecionada' : 'imagens selecionadas'} para o livro. Pronto para criar a capa?`} ctaLabel="Ir para Capa →" onCta={() => setTab('canva')} tone="success" />;
+            }
+          }
+          if (tab === 'canva') {
+            return <JourneyBanner icon="🚀" text="Gere e marque sua capa oficial. Com capa e miolo prontos, é hora de publicar." ctaLabel="Ir para Publicar →" onCta={() => setTab('kdp')} />;
+          }
+          return null;
+        })()}
         {tab === 'gerar' && (
           <GenerateTab
             activeTheme={activeTheme}

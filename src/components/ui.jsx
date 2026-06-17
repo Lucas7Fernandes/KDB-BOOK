@@ -157,3 +157,36 @@ export function ElapsedTimer({ startTime }) {
     </p>
   );
 }
+
+/**
+ * Banner de jornada: mostra o próximo passo recomendado no topo de uma aba,
+ * com um botão que leva direto a ele. Deixa o fluxo óbvio e guiado.
+ */
+export function JourneyBanner({ icon, text, ctaLabel, onCta, tone = 'accent' }) {
+  const bg = tone === 'success' ? '#E8F4EC' : 'var(--accent-bg, #FFF5EC)';
+  const fg = tone === 'success' ? 'var(--success)' : 'var(--accent)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+      background: bg, border: `1px solid ${fg}33`,
+      borderRadius: 'var(--radius-lg)', padding: '12px 16px',
+      marginBottom: 'var(--space-5)',
+    }}>
+      <span style={{ fontSize: 22, lineHeight: 1 }} aria-hidden="true">{icon}</span>
+      <span style={{ flex: 1, minWidth: 180, fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>{text}</span>
+      {ctaLabel && onCta && (
+        <button
+          onClick={onCta}
+          style={{
+            background: fg, color: '#fff', border: 'none',
+            borderRadius: 'var(--radius-md)', padding: '8px 16px',
+            fontWeight: 700, fontSize: 'var(--text-sm)', cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {ctaLabel}
+        </button>
+      )}
+    </div>
+  );
+}

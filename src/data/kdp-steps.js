@@ -67,33 +67,32 @@ export const KDP_STEPS = [
 
 /** Metadados default para o formulário KDP */
 export const DEFAULT_KDP_META = {
-  title: 'Baby Safari Animals',
-  subtitle: 'My First Coloring Book for Toddlers Ages 1-4 | 40 Big & Easy Cute Animals to Color | Bold Simple Outlines for Little Hands',
-  kw1: 'toddler coloring book ages 1-3',
+  title: 'My First Coloring Book',
+  subtitle: 'Baby Animals | 30+ Big & Easy Cute Animals to Color | Bold Simple Outlines for Little Hands',
+  kw1: 'first coloring book for toddlers',
   kw2: 'baby animals coloring book for kids',
-  kw3: 'first coloring book for toddlers',
+  kw3: 'toddler coloring book ages 1-3',
   kw4: 'bold and easy coloring book for kids',
   kw5: 'simple coloring book for preschoolers',
-  kw6: 'cute animal coloring book ages 2-4',
-  kw7: 'safari jungle animals toddler activity book',
+  kw6: 'cute animal coloring book',
+  kw7: 'big and easy coloring book toddlers',
   cat1: 'Books > Children\'s Books > Activities, Crafts & Games > Coloring Books',
   cat2: 'Books > Children\'s Books > Animals',
-  desc: `<b>Give your little one hours of happy, screen-free fun!</b>
+  desc: `This started as a coloring book for my own kid. It turned out so well that I wanted other little hands to enjoy it too.
 
-<b>Baby Safari Animals</b> is the perfect first coloring book for toddlers and preschoolers who are just learning to hold a crayon. Each page features one adorable baby safari animal drawn with big, bold, easy-to-color outlines — designed especially for little hands ages 1 to 4.
+If your little one is just learning to hold a crayon, this is the perfect first coloring book for them.
 
-<b>Inside this book you'll find:</b>
-• 40 cute baby animals — lion, elephant, giraffe, zebra, hippo, monkey and many more
-• Extra-thick bold outlines that are easy for tiny hands to stay inside
-• One animal per page, printed single-sided so colors won't bleed through
-• Big, simple designs with no tiny details to frustrate young children
-• Large 8.5 x 8.5 inch pages — plenty of room to color
+Every page features one big, friendly baby animal with thick, bold outlines that are easy for small hands to color inside. No tiny details to frustrate them, no complicated scenes — just simple, happy designs.
 
-<b>Why parents love it:</b>
-Coloring helps toddlers develop fine motor skills, hand-eye coordination, focus, and color recognition — all while having fun. A wonderful gift for birthdays, holidays, Easter baskets, or quiet-time activities at home.
+<b>Inside this book:</b>
+✏️ 30+ cute baby animals — lions, elephants, giraffes, puppies, and more
+🖍️ Extra-thick outlines, perfect for little hands
+📄 One animal per page, printed single-side
+📐 Big 8.5 x 8.5 inch pages with plenty of room to color
+👶 Simple, friendly designs kids will love
 
-<b>Perfect for ages 1, 2, 3 and 4.</b>
+Coloring helps young children build focus, fine motor skills, and color recognition — all while having fun away from screens. It makes a wonderful gift for birthdays, holidays, or quiet afternoons at home.
 
-Scroll up and click <b>Add to Cart</b> to start the coloring adventure today!`,
+Grab a copy, hand over the crayons, and watch the coloring adventures begin. 💛`,
   price: '8.99',
 };
