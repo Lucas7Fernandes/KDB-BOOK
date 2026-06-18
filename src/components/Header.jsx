@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 
 /**
  * Header com jornada LINEAR de publicação (1→4) + secundários.
@@ -6,6 +6,22 @@ import { useState } from 'react';
  */
 export function Header({ tab, setTab, historyCount, kdpDone, inBookCount = 0, hasCover = false }) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({});
+  const moreBtnRef = useRef(null);
+
+  // Posiciona o dropdown abaixo do botão usando coordenadas fixas
+  // (a .nav tem overflow-x:auto, que recortaria um menu absolute).
+  useLayoutEffect(() => {
+    if (moreOpen && moreBtnRef.current) {
+      const r = moreBtnRef.current.getBoundingClientRect();
+      setMenuPos({
+        position: 'fixed',
+        top: r.bottom + 6,
+        right: Math.max(8, window.innerWidth - r.right),
+        left: 'auto',
+      });
+    }
+  }, [moreOpen]);
 
   // Etapas concluídas (para mostrar ✓ verde)
   const done = {
@@ -80,6 +96,7 @@ export function Header({ tab, setTab, historyCount, kdpDone, inBookCount = 0, ha
 
         <div style={{ position: 'relative' }}>
           <button
+            ref={moreBtnRef}
             onClick={() => setMoreOpen((o) => !o)}
             className={`nav-item ${moreActive ? 'is-active' : ''}`}
             aria-haspopup="true"
@@ -95,7 +112,7 @@ export function Header({ tab, setTab, historyCount, kdpDone, inBookCount = 0, ha
                 style={{ position: 'fixed', inset: 0, zIndex: 40 }}
                 aria-hidden="true"
               />
-              <div className="more-menu">
+              <div className="more-menu" style={menuPos}>
                 {more.map(([key, icon, label]) => (
                   <button
                     key={key}
