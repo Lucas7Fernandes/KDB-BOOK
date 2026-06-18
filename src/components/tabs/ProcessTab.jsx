@@ -130,7 +130,7 @@ function ResultCard({ result, onDownload }) {
 // ── Componente principal ──────────────────────────────────────────────────────
 
 export function ProcessTab({ history = [], showToast }) {
-  const [source, setSource]         = useState('biblioteca'); // 'biblioteca' | 'upload'
+  const [source, setSource]         = useState('livro'); // 'livro' | 'biblioteca' | 'upload'
   const [uploads, setUploads]       = useState([]);           // { id, name, url }
   const [selected, setSelected]     = useState(new Set());
   const [threshold, setThreshold]   = useState(200);
@@ -142,10 +142,16 @@ export function ProcessTab({ history = [], showToast }) {
     () => history.filter((h) => h.drive_file_id || h.image_url),
     [history]
   );
+  const bookItems = useMemo(
+    () => libItems.filter((h) => h.inBook),
+    [libItems]
+  );
 
-  const pool = source === 'biblioteca'
-    ? libItems.map((h) => ({ id: h.id, label: h.animal_pt || h.animal_en || 'imagem', url: permanentImageUrl(h), base: h.animal_en || h.animal_pt || 'imagem' }))
-    : uploads.map((u) => ({ id: u.id, label: u.name, url: u.url, base: u.name.replace(/\.[^.]+$/, '') }));
+  const mapItem = (h) => ({ id: h.id, label: h.animal_pt || h.animal_en || 'imagem', url: permanentImageUrl(h), base: h.animal_en || h.animal_pt || 'imagem' });
+
+  const pool = source === 'upload'
+    ? uploads.map((u) => ({ id: u.id, label: u.name, url: u.url, base: u.name.replace(/\.[^.]+$/, '') }))
+    : (source === 'livro' ? bookItems : libItems).map(mapItem);
 
   const poolById = useMemo(() => Object.fromEntries(pool.map((p) => [p.id, p])), [pool]);
 
@@ -159,6 +165,17 @@ export function ProcessTab({ history = [], showToast }) {
   const selectNone = () => setSelected(new Set());
 
   const switchSource = (s) => { setSource(s); setSelected(new Set()); };
+
+  // Ao montar: se não há imagens "no livro", começa pela Biblioteca.
+  // Se há, pré-seleciona todas (intenção é editar essas).
+  useEffect(() => {
+    if (bookItems.length === 0) {
+      setSource('biblioteca');
+    } else {
+      setSelected(new Set(bookItems.map((h) => h.id)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleUpload = (files) => {
     const imgs = Array.from(files).filter((f) => f.type.startsWith('image/'));
@@ -219,12 +236,23 @@ export function ProcessTab({ history = [], showToast }) {
 
       {/* Fonte */}
       <div style={S.tabs}>
-        {[['biblioteca', `📚 Da Biblioteca (${libItems.length})`], ['upload', `📁 Upload manual${uploads.length ? ` (${uploads.length})` : ''}`]].map(([key, lbl]) => (
+        {[
+          ['livro', `✓ No livro (${bookItems.length})`],
+          ['biblioteca', `📚 Biblioteca (${libItems.length})`],
+          ['upload', `📁 Upload${uploads.length ? ` (${uploads.length})` : ''}`],
+        ].map(([key, lbl]) => (
           <button key={key} onClick={() => switchSource(key)} style={{ ...S.srcTab, ...(source === key ? S.srcTabActive : {}) }}>
             {lbl}
           </button>
         ))}
       </div>
+
+      {source === 'livro' && (
+        <p style={S.tip}>
+          Estas são as imagens que você marcou como <strong>“No livro”</strong> na Biblioteca.
+          Selecione quais quer limpar, ajuste o limiar e processe. A cópia limpa sai em PNG.
+        </p>
+      )}
 
       {source === 'upload' && (
         <>
@@ -258,7 +286,9 @@ export function ProcessTab({ history = [], showToast }) {
 
       {pool.length === 0 ? (
         <div style={S.empty}>
-          {source === 'biblioteca'
+          {source === 'livro'
+            ? 'Nenhuma imagem marcada como “No livro” ainda. Vá na Biblioteca e marque as que entram no livro.'
+            : source === 'biblioteca'
             ? 'Nenhuma imagem na Biblioteca ainda. Gere imagens na aba Criar primeiro.'
             : 'Nenhum arquivo carregado. Arraste suas imagens acima.'}
         </div>
