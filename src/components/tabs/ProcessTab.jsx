@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { permanentImageUrl } from '../../lib/format.js';
 
 /**
  * ProcessTab — Limpa fundo/preenchimento cinza das imagens e gera cópias em PNG.
@@ -137,10 +138,13 @@ export function ProcessTab({ history = [], showToast }) {
   const [processing, setProcessing] = useState(false);
   const fileRef = useRef(null);
 
-  const libItems = useMemo(() => history.filter((h) => h.image_url), [history]);
+  const libItems = useMemo(
+    () => history.filter((h) => h.drive_file_id || h.image_url),
+    [history]
+  );
 
   const pool = source === 'biblioteca'
-    ? libItems.map((h) => ({ id: h.id, label: h.animal_pt || h.animal_en || 'imagem', url: h.image_url, base: h.animal_en || h.animal_pt || 'imagem' }))
+    ? libItems.map((h) => ({ id: h.id, label: h.animal_pt || h.animal_en || 'imagem', url: permanentImageUrl(h), base: h.animal_en || h.animal_pt || 'imagem' }))
     : uploads.map((u) => ({ id: u.id, label: u.name, url: u.url, base: u.name.replace(/\.[^.]+$/, '') }));
 
   const poolById = useMemo(() => Object.fromEntries(pool.map((p) => [p.id, p])), [pool]);
