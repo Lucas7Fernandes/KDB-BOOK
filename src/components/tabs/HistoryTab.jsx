@@ -20,17 +20,22 @@ export function HistoryTab({
   const favCount  = history.filter((h) => h.favorite).length;
   const bookCount = history.filter((h) => h.inBook).length;
 
+  const isUntitled = (h) => !h.animal_pt || /^untitled$/i.test(h.animal_pt) || /^untitled$/i.test(h.animal_en || '');
+  const untitledCount = history.filter(isUntitled).length;
+
   const filterOptions = useMemo(() => [
     ['all', 'Todos', '📦'],
     ['fav', 'Favoritos', '⭐'],
     ['book', 'No livro', '✓'],
+    ...(untitledCount > 0 ? [['noname', `Sem nome (${untitledCount})`, '✏️']] : []),
     ...Object.entries(THEMES).map(([id, t]) => [id, t.name.split(' ').slice(-1)[0], t.emoji]),
-  ], []);
+  ], [untitledCount]);
 
   const filtered =
-    historyFilter === 'all'  ? history :
-    historyFilter === 'fav'  ? history.filter((h) => h.favorite) :
-    historyFilter === 'book' ? history.filter((h) => h.inBook) :
+    historyFilter === 'all'    ? history :
+    historyFilter === 'fav'    ? history.filter((h) => h.favorite) :
+    historyFilter === 'book'   ? history.filter((h) => h.inBook) :
+    historyFilter === 'noname' ? history.filter(isUntitled) :
     history.filter((h) => h.theme === historyFilter);
 
   const doExport = (format) => {
@@ -113,8 +118,6 @@ export function HistoryTab({
   };
 
   // Corrige automaticamente os "untitled" onde há pista (animal_pt preenchido).
-  const isUntitled = (h) => !h.animal_pt || /^untitled$/i.test(h.animal_pt) || /^untitled$/i.test(h.animal_en || '');
-
   const autoFixNames = async () => {
     const broken = history.filter(isUntitled);
     if (broken.length === 0) { showToast('Nenhum nome para corrigir 🎉'); return; }
@@ -141,8 +144,6 @@ export function HistoryTab({
       showToast(`✓ ${fixed} nome(s) corrigido(s) automaticamente!`);
     }
   };
-
-  const untitledCount = history.filter(isUntitled).length;
 
   return (
     <>
