@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { THEMES } from '../../data/themes.js';
 import { exportHistory } from '../../lib/export.js';
-import { syncDrive, deleteDriveFile } from '../../lib/api.js';
+import { syncDrive, deleteDriveFile, renameDriveFile } from '../../lib/api.js';
+import { resolveEnglishName, PT_TO_EN } from '../../data/animal-names-en.js';
 import { Button, EmptyState } from '../ui.jsx';
 import { HistoryCard } from '../HistoryCard.jsx';
 
@@ -92,6 +93,57 @@ export function HistoryTab({
     }
   };
 
+  // Renomeia um item: atualiza histórico (PT + EN) e renomeia o arquivo no Drive.
+  const renameItem = async (item, newPtName) => {
+    const en = PT_TO_EN[newPtName.toLowerCase()]
+      || PT_TO_EN[newPtName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')]
+      || newPtName;
+    setHistory((prev) => prev.map((h) =>
+      h.id === item.id ? { ...h, animal_pt: newPtName, animal_en: en } : h
+    ));
+    if (item.drive_file_id) {
+      try {
+        await renameDriveFile(webhookUrl, item.drive_file_id, `${en}.jpg`);
+      } catch {
+        showToast('Nome salvo no portal (falha ao renomear no Drive)', 'error');
+        return;
+      }
+    }
+    showToast(`Renomeado para "${newPtName}"`);
+  };
+
+  // Corrige automaticamente os "untitled" onde há pista (animal_pt preenchido).
+  const isUntitled = (h) => !h.animal_pt || /^untitled$/i.test(h.animal_pt) || /^untitled$/i.test(h.animal_en || '');
+
+  const autoFixNames = async () => {
+    const broken = history.filter(isUntitled);
+    if (broken.length === 0) { showToast('Nenhum nome para corrigir 🎉'); return; }
+
+    let fixed = 0;
+    const stillBroken = [];
+    for (const h of broken) {
+      // tenta achar o nome PT a partir do animal_pt; se for untitled, não há pista
+      const pt = (h.animal_pt || '').trim();
+      const en = resolveEnglishName(h);
+      if (pt && !/^untitled$/i.test(pt) && en && !/^untitled$/i.test(en)) {
+        setHistory((prev) => prev.map((x) => x.id === h.id ? { ...x, animal_en: en } : x));
+        if (h.drive_file_id) {
+          try { await renameDriveFile(webhookUrl, h.drive_file_id, `${en}.jpg`); } catch { /* ignora */ }
+        }
+        fixed++;
+      } else {
+        stillBroken.push(h);
+      }
+    }
+    if (stillBroken.length > 0) {
+      showToast(`${fixed} corrigido(s). ${stillBroken.length} sem pista — edite manualmente (campo vermelho).`, fixed ? 'success' : 'error');
+    } else {
+      showToast(`✓ ${fixed} nome(s) corrigido(s) automaticamente!`);
+    }
+  };
+
+  const untitledCount = history.filter(isUntitled).length;
+
   return (
     <>
       <div className="section-row">
@@ -102,6 +154,11 @@ export function HistoryTab({
           <Button variant="accent" onClick={handleSync} disabled={syncing}>
             {syncing ? '⏳ Sincronizando...' : '☁ Sincronizar do Drive'}
           </Button>
+          {untitledCount > 0 && (
+            <Button variant="info" onClick={autoFixNames}>
+              ✏️ Corrigir nomes ({untitledCount})
+            </Button>
+          )}
         </div>
         {history.length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -153,6 +210,7 @@ export function HistoryTab({
               onDelete={deleteItem}
               onToggleFavorite={toggleFavorite}
               onToggleInBook={toggleInBook}
+              onRename={renameItem}
             />
           ))}
         </div>

@@ -6,7 +6,8 @@ import { formatShortDate, permanentImageUrl } from '../lib/format.js';
  * Card individual do histórico (compacto, com thumbnail).
  * Ações: favoritar (⭐), incluir no livro (✓), excluir (🗑).
  */
-export function HistoryCard({ item, onDelete, onToggleFavorite, onToggleInBook }) {
+export function HistoryCard({ item, onDelete, onToggleFavorite, onToggleInBook, onRename }) {
+  const isUntitled = !item.animal_pt || /^untitled$/i.test(item.animal_pt) || /^untitled$/i.test(item.animal_en || '');
   const date = formatShortDate(item.completedAt);
   const theme = THEMES[item.theme];
   const isPhoto = item.isPhoto === true;
@@ -76,7 +77,27 @@ export function HistoryCard({ item, onDelete, onToggleFavorite, onToggleInBook }
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
           <span style={{ fontSize: 'var(--text-xl)', lineHeight: 1 }} aria-hidden="true">{emoji}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p className="result-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.animal_pt}</p>
+            {onRename ? (
+              <input
+                defaultValue={isUntitled ? '' : item.animal_pt}
+                placeholder={isUntitled ? '✏️ Digite o nome' : item.animal_pt}
+                onBlur={(e) => {
+                  const v = e.target.value.trim();
+                  if (v && v !== item.animal_pt) onRename(item, v);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+                className="result-title"
+                style={{
+                  width: '100%', border: 'none', background: 'transparent',
+                  borderBottom: isUntitled ? '2px solid var(--error)' : '1px solid transparent',
+                  outline: 'none', padding: '1px 0', font: 'inherit',
+                  color: isUntitled ? 'var(--error)' : 'inherit',
+                }}
+                onFocus={(e) => { e.target.style.borderBottomColor = 'var(--accent)'; }}
+              />
+            ) : (
+              <p className="result-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.animal_pt}</p>
+            )}
             <p className="result-subtitle">{item.animal_en}</p>
           </div>
         </div>

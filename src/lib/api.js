@@ -130,3 +130,15 @@ export async function uploadToDrive(webhookUrl, base64NoPrefix, fileName, signal
     signal
   );
 }
+
+/**
+ * Renomeia um arquivo no Google Drive via rota "rename" do Make.
+ * Usado para corrigir nomes "untitled" na Biblioteca de forma permanente.
+ */
+export async function renameDriveFile(webhookUrl, driveFileId, fileName, signal) {
+  return postWebhook(
+    webhookUrl,
+    { action: 'rename', drive_file_id: driveFileId, file_name: fileName },
+    signal
+  );
+}
