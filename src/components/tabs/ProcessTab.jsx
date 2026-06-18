@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { permanentImageUrl } from '../../lib/format.js';
+import { uploadToDrive } from '../../lib/api.js';
 
 /**
  * ProcessTab — Limpa fundo/preenchimento cinza das imagens e gera cópias em PNG.
@@ -129,13 +130,14 @@ function ResultCard({ result, onDownload }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export function ProcessTab({ history = [], showToast }) {
+export function ProcessTab({ history = [], webhookUrl, showToast }) {
   const [source, setSource]         = useState('livro'); // 'livro' | 'biblioteca' | 'upload'
   const [uploads, setUploads]       = useState([]);           // { id, name, url }
   const [selected, setSelected]     = useState(new Set());
   const [threshold, setThreshold]   = useState(200);
   const [results, setResults]       = useState([]);
   const [processing, setProcessing] = useState(false);
+  const [uploading, setUploading]   = useState(false);
   const fileRef = useRef(null);
 
   const libItems = useMemo(
@@ -221,6 +223,33 @@ export function ProcessTab({ history = [], showToast }) {
       setTimeout(() => downloadCanvas(r.procCanvas, `${r.base}_limpo.png`), i * 300);
     });
   };
+
+  // Envia as cópias limpas para o Google Drive (rota "upload" do Make),
+  // em fila sequencial. Depois aparecem na Biblioteca via "Sincronizar".
+  const uploadAll = useCallback(async () => {
+    const done = results.filter((r) => r.status === 'done');
+    if (!done.length || !webhookUrl) return;
+    setUploading(true);
+    let ok = 0;
+    for (const r of done) {
+      try {
+        const b64 = await new Promise((resolve) => {
+          r.procCanvas.toBlob((blob) => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(String(fr.result).split(',')[1]); // tira "data:image/png;base64,"
+            fr.readAsDataURL(blob);
+          }, 'image/png');
+        });
+        await uploadToDrive(webhookUrl, b64, `${r.base}_clean.png`);
+        ok++;
+        if (showToast) showToast(`☁ Enviando... ${ok}/${done.length}`, 'success');
+      } catch {
+        if (showToast) showToast(`Falha ao enviar ${r.base}`, 'error');
+      }
+    }
+    setUploading(false);
+    if (showToast) showToast(`✓ ${ok} enviada(s) ao Drive! Use "Sincronizar" na Biblioteca.`, 'success');
+  }, [results, webhookUrl, showToast]);
 
   const doneCount = results.filter((r) => r.status === 'done').length;
 
@@ -338,9 +367,15 @@ export function ProcessTab({ history = [], showToast }) {
               {doneCount} cópia{doneCount !== 1 ? 's' : ''} pronta{doneCount !== 1 ? 's' : ''}
             </h3>
             {doneCount > 0 && (
-              <button onClick={downloadAll} style={{ ...S.btn, background: C.success }}>
-                ⬇ Baixar todas ({doneCount})
-              </button>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button onClick={uploadAll} disabled={uploading || !webhookUrl}
+                  style={{ ...S.btn, opacity: uploading ? 0.6 : 1 }}>
+                  {uploading ? '⏳ Enviando…' : `☁ Enviar ao Drive (${doneCount})`}
+                </button>
+                <button onClick={downloadAll} style={{ ...S.btn, background: C.success }}>
+                  ⬇ Baixar todas ({doneCount})
+                </button>
+              </div>
             )}
           </div>
           <div style={S.resultsGrid}>

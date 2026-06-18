@@ -351,6 +351,7 @@ export default function App() {
         {tab === 'tratar' && (
           <ProcessTab
             history={history}
+            webhookUrl={webhookUrl}
             showToast={showToast}
           />
         )}

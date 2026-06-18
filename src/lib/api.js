@@ -117,3 +117,16 @@ export async function syncDrive(webhookUrl, signal) {
 export async function deleteDriveFile(webhookUrl, driveFileId, signal) {
   return postWebhook(webhookUrl, { action: 'delete', drive_file_id: driveFileId }, signal);
 }
+
+/**
+ * Faz upload de uma imagem (base64, sem o prefixo data:) para o Google Drive
+ * via rota "upload" do Make. Retorna { drive_file_id, name }.
+ * Usado pela aba "Limpar fundo" para enviar as cópias tratadas.
+ */
+export async function uploadToDrive(webhookUrl, base64NoPrefix, fileName, signal) {
+  return postWebhook(
+    webhookUrl,
+    { action: 'upload', image_b64: base64NoPrefix, file_name: fileName },
+    signal
+  );
+}
